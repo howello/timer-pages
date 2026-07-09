@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Document</title>
+  </head>
+
+  <body>
+    <!--导入SDK文件-->
+    <script
+      type="text/javascript"
+      src="https://gosspublic.alicdn.com/aliyun-oss-sdk-6.18.0.min.js"
+    ></script>
+    <script type="text/javascript">
+      const client = new OSS({
+        // yourRegion填写Bucket所在地域。以华东1（杭州）为例，Region填写为oss-cn-hangzhou。
+        region: "yourRegion",
+        authorizationV4: true,
+        // 从STS服务获取的临时访问密钥（AccessKey ID和AccessKey Secret）。
+        accessKeyId: "yourAccessKeyId",
+        accessKeySecret: "yourAccessKeySecret",
+        // 从STS服务获取的安全令牌（SecurityToken）。
+        stsToken: "yoursecurityToken",
+        // 填写Bucket名称。
+        bucket: "examplebucket",
+      });
+
+      // 配置响应头实现通过URL访问时自动下载文件，并设置下载后的文件名。
+      const filename = "examplefile.txt";
+      const response = {
+        "content-disposition": `attachment; filename=${encodeURIComponent(
+          filename
+        )}`,
+      };
+      // 填写Object完整路径。Object完整路径中不能包含Bucket名称。
+      const url = client.signatureUrl("exampleobject.txt", { response });
+      console.log(url);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,19 @@
+{
+  "change": "build-time-countdown-site",
+  "phase": "design",
+  "mode": "compact",
+  "canonical_spec": "openspec",
+  "generated_by": "comet-handoff.sh",
+  "context_hash": "b9e1a08c8a26b159055924614c81f7468364fcf76b8b3053a37aeb12f5dd9b68",
+  "files": [
+    { "path": "openspec/changes/build-time-countdown-site/proposal.md", "sha256": "14979e53f2f44e3567e1b9d7571b4bc863857824581353b1d897cee5f3b3c233" },
+    { "path": "openspec/changes/build-time-countdown-site/design.md", "sha256": "8ed0cfa28951934d60afe43799d7b24d9adff3aab45f1d75a282fd9df1bd73ed" },
+    { "path": "openspec/changes/build-time-countdown-site/tasks.md", "sha256": "a4ed041ae0881599603b6d4375ea0c4b59435035a2f0e4a964dc1c57efe6e227" },
+    { "path": "openspec/changes/build-time-countdown-site/specs/access-gate/spec.md", "sha256": "22e5ca4152c085a783518645afe40c38da3bdd81cfb03a1f5da1069d4626661b" },
+    { "path": "openspec/changes/build-time-countdown-site/specs/deployment-guide/spec.md", "sha256": "2e4ebe4d6ad6f856e1483a18bf364ae90ed6b4d9d4a7a1d128957a5cab4072ef" },
+    { "path": "openspec/changes/build-time-countdown-site/specs/event-cards/spec.md", "sha256": "0e9b92228fe1b08380367353975d26b389bb6dba1ec7da7dbd88f8f4ec20cf61" },
+    { "path": "openspec/changes/build-time-countdown-site/specs/holiday-data/spec.md", "sha256": "aad60fe32de981692bc1722fc8540fe16dce682d989afbe87e2477cada110559" },
+    { "path": "openspec/changes/build-time-countdown-site/specs/home-experience/spec.md", "sha256": "fac6c72e94672ffc1492a8d5f0548996fec0a6b024c3589bea16c58eaa04d8cb" },
+    { "path": "openspec/changes/build-time-countdown-site/specs/oss-storage/spec.md", "sha256": "1889c59d67699e3ec7e84d7be2d69d86a9292f651c244086cf055fe251e1dd6c" }
+  ]
+}
