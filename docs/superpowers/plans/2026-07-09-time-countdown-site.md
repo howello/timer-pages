@@ -76,7 +76,7 @@ mkdir -p css js
 </html>
 ```
 
-- [ ] **Step 1.3: 提交骨架**
+- [x] **Step 1.3: 提交骨架**
 
 ```bash
 git add index.html password.html css/fluffy.css js/config.js README.md
@@ -197,7 +197,7 @@ git commit -m "feat: implement event data store"
 
 **实现要点：** 固定卡片区、列表、走动时间刷新、弹窗、响应式
 
-- [ ] **提交**
+- [x] **提交**
 
 ```bash
 git add js/card-render.js js/modal.js js/home.js
@@ -213,7 +213,7 @@ git commit -m "feat: implement card rendering and home interactions"
 
 **内容：** Cloudflare Pages 部署、环境变量、OSS RAM 子账号、初始 JSON、验证清单
 
-- [ ] **提交**
+- [x] **提交**
 
 ```bash
 git add docs/deployment-guide.md
