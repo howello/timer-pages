@@ -19,7 +19,7 @@
   async function load() {
     try {
       // 1. 从 OSS 读取自定义事件和节假日元数据
-      const config = await window.OSSStorage.read();
+      const config = await window.APIClient.read();
       customEvents = config.events || [];
       holidayMeta = config.holidayMeta || {};
 
@@ -286,7 +286,7 @@
       holidayMeta: holidayMeta
     };
 
-    await window.OSSStorage.write(config);
+    await window.APIClient.write(config);
   }
 
   // 导出 API

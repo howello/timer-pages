@@ -1,6 +1,6 @@
 /**
  * 节假日数据接入模块
- * 从节假日 API 获取数据并提供分组、高速免费判定等功能
+ * 通过 /api/holidays/{year} 代理获取数据
  */
 
 /**
@@ -8,19 +8,30 @@
  * @param {number} year - 年份
  * @returns {Promise<Array>} 节假日数据数组，失败时返回空数组
  */
-async function fetchHolidays(year) {
-  try {
-    const response = await fetch(`https://api.jiejiariapi.com/v1/holidays/${year}`);
+function fetchHolidays(year) {
+  var targetYear = year || new Date().getFullYear();
+  return fetch('/api/holidays/' + targetYear).then(function (response) {
     if (!response.ok) {
-      console.warn(`节假日 API 请求失败: ${response.status}`);
+      console.warn('[holiday] API 请求失败: ' + response.status);
       return [];
     }
-    const data = await response.json();
+    return response.json();
+  }).then(function (data) {
+    // 将对象格式（如 {"2026-01-01": {...}}）转为数组
+    if (data && typeof data === 'object' && !Array.isArray(data)) {
+      var arr = [];
+      for (var dateKey in data) {
+        if (data.hasOwnProperty(dateKey)) {
+          arr.push({ date: dateKey, name: data[dateKey].name, isOffDay: data[dateKey].isOffDay });
+        }
+      }
+      return arr;
+    }
     return Array.isArray(data) ? data : [];
-  } catch (error) {
-    console.warn('节假日 API 调用异常:', error);
+  }).catch(function (error) {
+    console.warn('[holiday] API 调用异常:', error);
     return [];
-  }
+  });
 }
 
 /**
