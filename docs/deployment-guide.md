@@ -1,6 +1,6 @@
-# 时间倒计时静态网站 — 部署手册
+# 时间倒计时网站 — 部署手册
 
-> 部署目标：Cloudflare Pages + 阿里云 OSS（纯静态、无构建打包）
+> 部署目标：Cloudflare Pages（含 Functions）+ 阿里云 OSS
 
 ---
 
@@ -8,21 +8,34 @@
 
 ```
 /                           根目录
-├── index.html              主页（固定卡片 + 列表 + 弹窗）
+├── index.html              主页（Cream-Canvas 居中布局）
 ├── password.html           密码进入页
 ├── css/fluffy.css          毛玻璃/奶油/新拟态设计系统
-├── js/config.js            运行时配置（Cloudflare Pages 构建期占位符替换）
-├── js/access-gate.js       密码访问控制
-├── js/lunar.js             农历换算（包裹 lunar-javascript）
-├── js/time-calc.js         时间计算核心（纯函数）
-├── js/holiday.js           节假日 API 接入
-├── js/oss-storage.js       OSS 读写
-├── js/store.js             事件数据中心
-├── js/card-render.js       卡片渲染
-├── js/modal.js             新增/编辑弹窗
-├── js/home.js              主页装配
+├── functions/              Cloudflare Pages Functions 后端
+│   ├── _middleware.js       统一鉴权
+│   └── api/
+│       ├── _utils.js        公共工具（Session HMAC、Cookie 解析）
+│       ├── login.js         POST 密码校验 → 签发 Cookie
+│       ├── logout.js        POST 清 Cookie
+│       ├── session.js       GET 查询当前会话状态
+│       ├── config.js        GET 返回前端安全运行时配置
+│       ├── data.js          GET/PUT OSS 上事件配置 JSON（V4 签名）
+│       └── holidays/
+│           └── [year].js    GET 代理节假日 API
+├── js/
+│   ├── config.js            运行时从 /api/config 拉取配置
+│   ├── access-gate.js       密码验证（POST /api/login）
+│   ├── password-init.js     密码页交互
+│   ├── lunar.js             农历换算（包裹 lunar-javascript）
+│   ├── time-calc.js         时间计算核心（纯函数）
+│   ├── holiday.js           节假日数据接入（调 /api/holidays/{year}）
+│   ├── api-client.js        API 客户端（调 /api/data GET/PUT）
+│   ├── store.js             事件数据中心
+│   ├── card-render.js       卡片渲染
+│   ├── modal.js             新增/编辑弹窗
+│   └── home.js              主页装配
 └── docs/
-    └── deployment-guide.md 本文件
+    └── deployment-guide.md  本文件
 ```
 
 ---
@@ -38,52 +51,31 @@
 
 ### 2.2 构建设置
 
-由于项目是 **纯静态、无构建打包**：
-
 | 配置项 | 值 |
 |--------|-----|
 | Framework preset | **No framework** |
-| Build command | `sed -i "s/__PASSWORD__/${PASSWORD}/g" js/config.js`（可选） |
+| Build command | **留空**（无需构建步骤） |
 | Build output directory | `/` |
 
-**推荐方式（使用 Pages 环境变量 + shell 脚本替换占位符）：**
-
-创建 `build.sh`：
-
-```bash
-#!/bin/bash
-# Cloudflare Pages 构建脚本：替换占位符
-sed -i "s/__PASSWORD__/$PASSWORD/g" js/config.js
-sed -i "s/__OSS_REGION__/$OSS_REGION/g" js/config.js
-sed -i "s/__OSS_BUCKET__/$OSS_BUCKET/g" js/config.js
-sed -i "s/__OSS_AK__/$OSS_AK/g" js/config.js
-sed -i "s/__OSS_SK__/$OSS_SK/g" js/config.js
-sed -i "s/__OSS_OBJECT_KEY__/$OSS_OBJECT_KEY/g" js/config.js
-```
-
-- Build command：`bash build.sh`
-- Build output directory：`/`
-
-> ⚠️ `build.sh` 需提交到仓库，**不可包含真实密钥**。
+> 项目源码即产物：无需 npm 构建或 sed 替换。
 
 ---
 
 ## 三、环境变量配置
 
-在 Cloudflare Pages 设置中配置以下 **Build secrets** 环境变量：
+在 Cloudflare Pages → **Settings** → **Environment variables** → **Production** 中添加：
 
-| 变量名 | 说明 | 示例 |
+| 变量名 | 用途 | 示例 |
 |--------|------|------|
-| `PASSWORD` | 网站访问密码 | `123456` |
+| `PASSWORD` | 网站访问密码 | `mysecret123` |
+| `SESSION_SECRET` | Session 签名密钥（建议 32 字节随机 hex） | `a1b2c3d4e5f6...` |
 | `OSS_REGION` | OSS Bucket 所在区域 | `oss-cn-hangzhou` |
 | `OSS_BUCKET` | OSS Bucket 名称 | `howe-file` |
 | `OSS_AK` | RAM 子账号 AccessKey ID | `LTAI...` |
 | `OSS_SK` | RAM 子账号 AccessKey Secret | `xxxx` |
 | `OSS_OBJECT_KEY` | OSS 中存储事件数据的 JSON 文件名 | `countdown-data.json` |
 
-> ⚠️ **安全提示**：这些值只存在于 Cloudflare Pages 后台，不会出现在仓库中。
-> 构建期 `sed` 替换后，密码和 OSS 密钥会出现在前端的 `config.js` 中。
-> 前端密钥不可避免暴露，**必须配合 OSS 最小权限策略控制破坏面**（见第四节）。
+> **安全提示**：所有密钥仅存在于 Cloudflare Pages Functions 环境变量中，在前端静态 JS 中 **不可见**。
 
 ---
 
@@ -96,24 +88,16 @@ sed -i "s/__OSS_OBJECT_KEY__/$OSS_OBJECT_KEY/g" js/config.js
    - 名称：`howe-file`（全局唯一）
    - 地域：选择离用户近的区域（如 `oss-cn-hangzhou`）
    - 存储类型：标准存储
-   - **访问权限**：**公共读**（用户浏览器需要读取 JSON）
-3. 配置 CORS：
-   - 新建规则：
-     - AllowedOrigins: `https://timer.wyantao.com`
-     - AllowedMethods: `GET, PUT, POST, DELETE`
-     - AllowedHeaders: `*`
-     - ExposeHeaders: `ETag, x-oss-request-id`
-     - MaxAgeSeconds: `3600`
+   - **访问权限**：**公共读**（需读取 JSON，后续也可改为私有+签名访问）
+3. 如使用私有 Bucket，Functions 端已实现 V4 签名，无需额外配置
 
 ### 4.2 RAM 子账号（最小权限）
 
-**步骤：**
-
 1. 进入 [RAM 控制台](https://ram.console.aliyun.com)
 2. 创建用户：
-   - 名称：`timer-pages-config`
+   - 名称：`countdown-pages-function`
    - 访问方式：OpenAPI 调用访问（勾选 **程序访问**）
-   - 获取 AccessKey ID 和 Secret（**保存好，后续不会再次显示**）
+   - 获取 AccessKey ID 和 Secret（**保存好，后续不再显示**）
 3. 创建自定义策略：
 
 ```json
@@ -122,34 +106,26 @@ sed -i "s/__OSS_OBJECT_KEY__/$OSS_OBJECT_KEY/g" js/config.js
   "Statement": [
     {
       "Effect": "Allow",
-      "Action": [
-        "oss:GetObject",
-        "oss:PutObject"
-      ],
-      "Resource": [
-        "acs:oss:*:*:howe-file/countdown-data.json"
-      ]
+      "Action": ["oss:GetObject", "oss:PutObject"],
+      "Resource": ["acs:oss:*:*:howe-file/countdown-data.json"]
     }
   ]
 }
 ```
 
-> ⚠️ 将 `howe-file` 替换为你的 Bucket 名，`countdown-data.json` 替换为你的对象名。
-
-4. 授权：将策略绑定到 `countdown-oss-user`
+4. 授权：将策略绑定到该 RAM 用户
 
 ### 4.3 安全风险提示
 
-- OSS 密钥会暴露在前端 `config.js` 中，任何访问网站的用户都能获取
-- 最小权限策略将破坏面限制到**一个 JSON 文件**
-- 即使密钥泄露，攻击者最多只能覆盖这一个文件
-- **不要**将 OSS 凭证用于其他敏感资源
+- 密钥仅存在于 Cloudflare Pages 环境变量中，通过 Pages Functions 服务端读取
+- 前端静态 JS 中 **不包含** 任何密码或 OSS 密钥
+- 最小权限策略将破坏面限制到 **一个 JSON 文件**
 
 ---
 
 ## 五、初始 OSS JSON 文件
 
-首次部署前，手动上传初始 JSON 到 OSS：
+首次部署前，在 OSS 控制台上传初始 JSON：
 
 ```json
 {
@@ -165,92 +141,77 @@ sed -i "s/__OSS_OBJECT_KEY__/$OSS_OBJECT_KEY/g" js/config.js
       "note": "距离新的生活节奏",
       "pinned": true,
       "order": 0
-    },
-    {
-      "id": "evt_ef34gh",
-      "type": "recurring",
-      "title": "结婚纪念日",
-      "calendar": "lunar",
-      "lunarMonth": 8,
-      "lunarDay": 16,
-      "isLeapMonth": false,
-      "note": "",
-      "pinned": false,
-      "order": 1
     }
   ],
-  "holidayMeta": {
-    "festival:春节": { "pinned": true, "order": -1 },
-    "festival:国庆节": { "pinned": false, "order": 5 }
-  }
+  "holidayMeta": {}
 }
-```
-
-**上传方式：**
-- 在 OSS 控制台手动上传（文件名为 `countdown-data.json`）
-- 或使用 `curl`：
-
-```bash
-curl -X PUT "https://howe-file.oss-cn-hangzhou.aliyuncs.com/countdown-data.json" \
-  -H "Authorization: OSS LTAIxxxxx:xxxxx" \
-  -H "Content-Type: application/json" \
-  --data-binary @events.json
 ```
 
 ---
 
 ## 六、上线验证清单
 
-### 6.1 密码访问
-
+### 密码访问
 - [ ] 访问网站 → 看到密码页
 - [ ] 输入正确密码 → 进入主页
 - [ ] 输入错误密码 → 显示错误提示
-- [ ] 直接访问 `index.html` → 未认证时跳转密码页
-- [ ] 刷新主页 → 仍保持登录态（sessionStorage）
-- [ ] 关闭浏览器 → 重新访问需输入密码
+- [ ] 直接访问 index.html → 未认证时跳转密码页
+- [ ] 刷新主页 → 仍保持登录态（HttpOnly Cookie）
+- [ ] 关闭浏览器 → Cookie 过期，重新访问需输入密码
 
-### 6.2 主页功能
-
-- [ ] 初始只展示固定卡片（pinned 或前 2 张）
-- [ ] 向下滚动 → 显现标题栏按钮与列表
+### 主页功能
+- [ ] 初始只展示固定卡片（pinned 项）
+- [ ] 向下滚动 → 标题栏按钮与列表动画浮现
 - [ ] 卡片显示走动时间（每秒刷新）
 - [ ] 点击新增按钮 → 弹窗出现，可填表单
+- [ ] 分段控件（公历/农历）切换正常
 - [ ] 保存事件 → 卡片刷新，数据写回 OSS
 - [ ] 点击置顶 → 卡片置顶，状态写回 OSS
 - [ ] 拖拽排序 → 顺序变化，状态写回 OSS
-- [ ] 编辑自定义事件 → 弹窗预填，保存后更新
-- [ ] 删除自定义事件 → 二次确认，删除后刷新
+- [ ] 编辑自定义事件 → 弹窗预填数据
+- [ ] 删除自定义事件 → 二次确认后删除
 - [ ] 节日卡片不提供删除入口
 
-### 6.3 降级场景
-
+### 降级场景
 - [ ] 节假日 API 失败 → 不阻塞其他卡片展示
 - [ ] OSS 读取失败 → 空列表初始化，不崩溃
 - [ ] OSS 写入失败 → 提示错误，不阻塞页面
 - [ ] 密码错误连续 5 次 → 表单锁定 10 秒
 
-### 6.4 响应式
+### 响应式
+- [ ] 电脑端（≥1025px）：居中单栏，卡片可 2 列
+- [ ] 手机端（≤640px）：全宽单栏，可触控操作
+- [ ] `prefers-reduced-motion`：动画弱化
 
-- [ ] 电脑端（>760px）：双栏布局，正常交互
-- [ ] 手机端（≤760px）：单栏布局，可触控操作
-- [ ] `prefers-reduced-motion`：动画弱化，功能可用
-
-### 6.5 农历计算
-
-- [ ] 农历周期事件 → 换算为正确公历日期
+### 农历计算
+- [ ] 农历周期事件 → 正确换算公历日期
 - [ ] 跨年滚动 → 今年已过自动用明年
-- [ ] 闰月事件 → 正确处理（month 传负数）
 
 ---
 
-## 七、常见问题
+## 七、本地开发
+
+使用 Cloudflare Wrangler 在本地调试 Functions：
+
+```bash
+npm install -g wrangler
+wrangler pages dev . --binding PASSWORD=test123 --binding SESSION_SECRET=dev-secret-123
+```
+
+浏览器打开 `http://localhost:8788`，密码输入 `test123` 即可进入主页。
+
+---
+
+## 八、常见问题
 
 **Q: 节假日 API 返回空数据？**
-A: `api.jiejiariapi.com` 可能限制某些年份数据。模块已实现降级，空数据不阻塞。如持续异常，可考虑备用 API。
+A: `api.jiejiariapi.com` 可能限制某些年份数据。模块已实现降级，空数据不阻塞。
 
-**Q: 浏览器控制台报错 "OSS is not defined"？**
-A: CDN 引入 `aliyun-oss-sdk` 失败。检查网络是否能访问 `gosspublic.alicdn.com`，或使用国内镜像。
+**Q: 密码输入正确但无法进入？**
+A: 检查 `SESSION_SECRET` 环境变量是否已配置。如未配置，HMAC 签名密钥会使用硬编码回退值。
 
-**Q: 表单提交后卡片不更新？**
-A: 检查 `oss-storage.js` 是否正确初始化（参数来自 `config.js` 占位符替换后的真实值）。Cloudflare Pages 构建期需运行 `sed` 替换脚本。
+**Q: OSS 写入失败？**
+A: 检查：
+1. `OSS_REGION` / `OSS_BUCKET` / `OSS_OBJECT_KEY` 是否正确
+2. RAM 子账号是否有该文件的读写权限
+3. OSS Bucket CORS 配置（如果用公共读则无需 CORS）
