@@ -29,10 +29,10 @@
 
 ## 5. OSS 存储读写（oss-storage）
 
-- [ ] 5.1 实现 `js/oss-storage.js`：用 aliyun-oss-sdk 初始化 client（参数来自注入配置）
-- [ ] 5.2 读取 OSS 上的事件配置 JSON（参考 download 示例）
-- [ ] 5.3 覆盖写回事件配置 JSON（参考 upload 示例）
-- [ ] 5.4 读取失败/写入失败的降级与错误提示
+- [x] 5.1 实现 `js/oss-storage.js`：用 aliyun-oss-sdk 初始化 client（参数来自注入配置）
+- [x] 5.2 读取 OSS 上的事件配置 JSON（参考 download 示例）
+- [x] 5.3 覆盖写回事件配置 JSON（参考 upload 示例）
+- [x] 5.4 读取失败/写入失败的降级与错误提示
 
 ## 6. 主页交互体验（home-experience）
 
