@@ -102,7 +102,7 @@ git commit -m "feat: add project skeleton
 
 **实现要点：** 密码校验、sessionStorage 会话、主页守卫、密码页逻辑
 
-- [ ] **提交**
+- [x] **提交**
 
 ```bash
 git add js/access-gate.js
@@ -121,7 +121,7 @@ git commit -m "feat: implement password access control"
 
 **实现要点：** 4 类事件归约为目标 Date，农历↔公历换算，跨年滚动
 
-- [ ] **提交**
+- [x] **提交**
 
 ```bash
 git add js/time-calc.js js/lunar.js
@@ -140,7 +140,7 @@ git commit -m "feat: implement time calculation and lunar conversion"
 
 **实现要点：** API 调用、按 name 分组取最早日、高速免费标注、降级处理
 
-- [ ] **提交**
+- [x] **提交**
 
 ```bash
 git add js/holiday.js
@@ -159,7 +159,7 @@ git commit -m "feat: implement holiday API integration"
 
 **实现要点：** OSS client 初始化、读 JSON、覆盖写、降级
 
-- [ ] **提交**
+- [x] **提交**
 
 ```bash
 git add js/oss-storage.js
@@ -178,7 +178,7 @@ git commit -m "feat: implement OSS storage read/write"
 
 **实现要点：** 合并自定义事件+节假日、holidayMeta 覆盖、统一排序、写回 OSS
 
-- [ ] **提交**
+- [x] **提交**
 
 ```bash
 git add js/store.js
@@ -197,7 +197,7 @@ git commit -m "feat: implement event data store"
 
 **实现要点：** 固定卡片区、列表、走动时间刷新、弹窗、响应式
 
-- [ ] **提交**
+- [x] **提交**
 
 ```bash
 git add js/card-render.js js/modal.js js/home.js
@@ -213,7 +213,7 @@ git commit -m "feat: implement card rendering and home interactions"
 
 **内容：** Cloudflare Pages 部署、环境变量、OSS RAM 子账号、初始 JSON、验证清单
 
-- [ ] **提交**
+- [x] **提交**
 
 ```bash
 git add docs/deployment-guide.md
