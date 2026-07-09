@@ -197,7 +197,7 @@ git commit -m "feat: implement event data store"
 
 **实现要点：** 固定卡片区、列表、走动时间刷新、弹窗、响应式
 
-- [x] **提交**
+- [ ] **提交**
 
 ```bash
 git add js/card-render.js js/modal.js js/home.js
@@ -213,7 +213,7 @@ git commit -m "feat: implement card rendering and home interactions"
 
 **内容：** Cloudflare Pages 部署、环境变量、OSS RAM 子账号、初始 JSON、验证清单
 
-- [x] **提交**
+- [ ] **提交**
 
 ```bash
 git add docs/deployment-guide.md

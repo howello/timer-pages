@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Access Gate 测试</title>
+  <style>
+    body {
+      font-family: monospace;
+      padding: 20px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .test-case {
+      margin: 15px 0;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    .pass { background: #d4edda; }
+    .fail { background: #f8d7da; }
+    button { margin: 5px; padding: 5px 10px; }
+  </style>
+</head>
+<body>
+  <h1>Access Gate 模块测试</h1>
+
+  <div id="test-results"></div>
+
+  <h2>手动测试</h2>
+  <button onclick="testVerify()">测试密码验证</button>
+  <button onclick="testSession()">测试会话管理</button>
+  <button onclick="clearSession()">清除会话</button>
+  <button onclick="checkAuth()">检查认证状态</button>
+
+  <script src="js/config.js"></script>
+  <script src="js/access-gate.js"></script>
+  <script>
+    const results = document.getElementById('test-results');
+
+    function log(message, pass) {
+      const div = document.createElement('div');
+      div.className = 'test-case ' + (pass ? 'pass' : 'fail');
+      div.textContent = (pass ? '✓ ' : '✗ ') + message;
+      results.appendChild(div);
+    }
+
+    function runTests() {
+      results.innerHTML = '<h2>自动测试结果</h2>';
+
+      // 测试 1: verify() 函数 - 空输入
+      log('测试 1: verify(空字符串) 返回 false', !window.AccessGate.verify(''));
+      log('测试 2: verify(null) 返回 false', !window.AccessGate.verify(null));
+      log('测试 3: verify(undefined) 返回 false', !window.AccessGate.verify(undefined));
+
+      // 测试 4: verify() 函数 - 开发模式（密码为占位符）
+      const devMode = window.APP_CONFIG?.password === '__PASSWORD__';
+      if (devMode) {
+        log('测试 4: 开发模式 - verify(任意密码) 返回 true', window.AccessGate.verify('test123'));
+      } else {
+        log('测试 4: 生产模式 - verify(错误密码) 返回 false', !window.AccessGate.verify('wrongpassword'));
+      }
+
+      // 测试 5: isAuthed() - 初始状态
+      sessionStorage.removeItem('countdown_session');
+      log('测试 5: 清除会话后 isAuthed() 返回 false', !window.AccessGate.isAuthed());
+
+      // 测试 6: handlePasswordSubmit() - 空输入
+      const result1 = window.AccessGate.handlePasswordSubmit('');
+      log('测试 6: handlePasswordSubmit(空字符串) 返回失败', !result1.success);
+
+      // 测试 7: handlePasswordSubmit() - 成功情况（开发模式）
+      if (devMode) {
+        const result2 = window.AccessGate.handlePasswordSubmit('testpass');
+        log('测试 7: handlePasswordSubmit(有效密码) 返回成功', result2.success);
+        log('测试 8: 提交成功后 isAuthed() 返回 true', window.AccessGate.isAuthed());
+      }
+
+      // 测试 9: clearAuthed()
+      window.AccessGate.clearAuthed();
+      log('测试 9: clearAuthed() 后 isAuthed() 返回 false', !window.AccessGate.isAuthed());
+
+      // 测试 10: getReturnUrl()
+      sessionStorage.setItem('countdown_return_url', '/test.html');
+      const returnUrl = window.AccessGate.getReturnUrl();
+      log('测试 10: getReturnUrl() 返回正确的 URL', returnUrl === '/test.html');
+      log('测试 11: getReturnUrl() 清除一次性 URL', !sessionStorage.getItem('countdown_return_url'));
+
+      // 测试 12: getReturnUrl() 默认值
+      const defaultUrl = window.AccessGate.getReturnUrl();
+      log('测试 12: getReturnUrl() 无保存URL时返回默认值', defaultUrl === '/index.html');
+
+      console.log('所有测试完成');
+    }
+
+    function testVerify() {
+      const password = prompt('请输入密码测试：');
+      const result = window.AccessGate.verify(password);
+      alert('验证结果: ' + (result ? '成功 ✓' : '失败 ✗'));
+    }
+
+    function testSession() {
+      const result = window.AccessGate.handlePasswordSubmit('test123');
+      alert('提交结果: ' + result.message + '\n认证状态: ' + window.AccessGate.isAuthed());
+    }
+
+    function clearSession() {
+      window.AccessGate.clearAuthed();
+      alert('会话已清除\n认证状态: ' + window.AccessGate.isAuthed());
+    }
+
+    function checkAuth() {
+      alert('当前认证状态: ' + (window.AccessGate.isAuthed() ? '已认证 ✓' : '未认证 ✗'));
+    }
+
+    // 页面加载时自动运行测试
+    window.addEventListener('DOMContentLoaded', runTests);
+  </script>
+</body>
+</html>

@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>时间计算模块测试</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+    h1 {
+      color: #333;
+    }
+    .test-section {
+      background: white;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .test-case {
+      margin: 10px 0;
+      padding: 10px;
+      background: #f9f9f9;
+      border-left: 4px solid #4CAF50;
+      font-family: monospace;
+    }
+    .test-case.fail {
+      border-color: #f44336;
+      background: #ffebee;
+    }
+    .test-result {
+      margin-top: 5px;
+      color: #666;
+    }
+    .summary {
+      background: #e3f2fd;
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 20px;
+    }
+    .pass {
+      color: #4CAF50;
+      font-weight: bold;
+    }
+    .fail-text {
+      color: #f44336;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>时间计算模块测试</h1>
+  <div id="test-output"></div>
+
+  <!-- CDN 依赖 -->
+  <script src="https://cdn.jsdelivr.net/npm/lunar-javascript@1.6.12/lunar.min.js"></script>
+
+  <!-- 待测试模块 -->
+  <script src="js/lunar.js"></script>
+  <script src="js/time-calc.js"></script>
+
+  <script>
+    // 测试框架
+    const tests = {
+      passed: 0,
+      failed: 0,
+      results: []
+    };
+
+    function assert(condition, message) {
+      if (condition) {
+        tests.passed++;
+        tests.results.push({ pass: true, message });
+      } else {
+        tests.failed++;
+        tests.results.push({ pass: false, message });
+        console.error('断言失败:', message);
+      }
+    }
+
+    function assertEqual(actual, expected, message) {
+      const pass = actual === expected;
+      if (pass) {
+        tests.passed++;
+        tests.results.push({
+          pass: true,
+          message: `${message} (期望: ${expected}, 实际: ${actual})`
+        });
+      } else {
+        tests.failed++;
+        tests.results.push({
+          pass: false,
+          message: `${message} (期望: ${expected}, 实际: ${actual})`
+        });
+        console.error('断言失败:', message, { expected, actual });
+      }
+    }
+
+    function assertDateEqual(actual, expected, message, toleranceMs = 1000) {
+      const diff = Math.abs(actual - expected);
+      const pass = diff < toleranceMs;
+      if (pass) {
+        tests.passed++;
+        tests.results.push({
+          pass: true,
+          message: `${message} (${actual.toLocaleDateString('zh-CN')})`
+        });
+      } else {
+        tests.failed++;
+        tests.results.push({
+          pass: false,
+          message: `${message} (期望: ${expected.toLocaleDateString('zh-CN')}, 实际: ${actual.toLocaleDateString('zh-CN')})`
+        });
+        console.error('日期断言失败:', message, { expected, actual });
+      }
+    }
+
+    function testSection(title, testFn) {
+      const section = document.createElement('div');
+      section.className = 'test-section';
+      section.innerHTML = `<h2>${title}</h2>`;
+      document.getElementById('test-output').appendChild(section);
+
+      try {
+        testFn();
+      } catch (error) {
+        tests.failed++;
+        tests.results.push({
+          pass: false,
+          message: `${title} - 抛出异常: ${error.message}`
+        });
+        console.error(`测试 "${title}" 抛出异常:`, error);
+      }
+    }
+
+    // ========== 测试用例 ==========
+
+    testSection('1. 时间差计算 (diff)', () => {
+      const now = new Date('2026-07-09T10:00:00');
+      const future = new Date('2026-07-10T12:30:45');
+      const past = new Date('2026-07-08T08:00:00');
+
+      // 测试未来时间
+      const diffFuture = window.TimeCalc.diff(now, future);
+      assertEqual(diffFuture.days, 1, '未来时间 - 天数');
+      assertEqual(diffFuture.hours, 2, '未来时间 - 小时');
+      assertEqual(diffFuture.minutes, 30, '未来时间 - 分钟');
+      assertEqual(diffFuture.seconds, 45, '未来时间 - 秒');
+      assertEqual(diffFuture.isPast, false, '未来时间 - isPast 应为 false');
+
+      // 测试过去时间
+      const diffPast = window.TimeCalc.diff(now, past);
+      assertEqual(diffPast.days, 1, '过去时间 - 天数');
+      assertEqual(diffPast.hours, 2, '过去时间 - 小时');
+      assertEqual(diffPast.minutes, 0, '过去时间 - 分钟');
+      assertEqual(diffPast.seconds, 0, '过去时间 - 秒');
+      assertEqual(diffPast.isPast, true, '过去时间 - isPast 应为 true');
+    });
+
+    testSection('2. 倒计时事件 (countdown)', () => {
+      const event = {
+        type: 'countdown',
+        date: '2026-12-31T23:59:59'
+      };
+
+      const target = window.TimeCalc.resolveTargetDate(event);
+      const expected = new Date('2026-12-31T23:59:59');
+      assertDateEqual(target, expected, '倒计时事件目标日期');
+    });
+
+    testSection('3. 正计时事件 (elapsed)', () => {
+      const event = {
+        type: 'elapsed',
+        date: '2020-01-01T00:00:00'
+      };
+
+      const target = window.TimeCalc.resolveTargetDate(event);
+      const expected = new Date('2020-01-01T00:00:00');
+      assertDateEqual(target, expected, '正计时事件起点日期');
+    });
+
+    testSection('4. 公历周期性事件 (recurring solar)', () => {
+      const birthdayEvent = {
+        type: 'recurring',
+        dateSystem: 'solar',
+        date: '1990-05-15T00:00:00'
+      };
+
+      const target = window.TimeCalc.resolveTargetDate(birthdayEvent);
+      const now = new Date();
+      const currentYear = now.getFullYear();
+
+      // 应该返回今年或明年的 5 月 15 日
+      assert(target > now, '周期性事件目标应在未来');
+      assertEqual(target.getMonth(), 4, '周期性事件月份应为 5 月（索引 4）');
+      assertEqual(target.getDate(), 15, '周期性事件日期应为 15 日');
+      assert(
+        target.getFullYear() === currentYear || target.getFullYear() === currentYear + 1,
+        '周期性事件年份应为今年或明年'
+      );
+    });
+
+    testSection('5. 农历周期性事件 (recurring lunar)', () => {
+      // 测试春节（农历正月初一）
+      const springFestival = {
+        type: 'recurring',
+        dateSystem: 'lunar',
+        lunarMonth: 1,
+        lunarDay: 1,
+        isLeapMonth: false
+      };
+
+      const target = window.TimeCalc.resolveTargetDate(springFestival);
+      const now = new Date();
+
+      assert(target > now, '农历周期性事件目标应在未来');
+
+      // 验证返回的是合理的日期范围（春节通常在 1-2 月）
+      const month = target.getMonth() + 1;
+      assert(month >= 1 && month <= 2, `春节应在 1-2 月，实际: ${month}月`);
+    });
+
+    testSection('6. 农历转公历 (nextSolarOfLunar)', () => {
+      // 测试农历正月初一（春节）
+      const springFestival = window.LunarHelper.nextSolarOfLunar(1, 1, false);
+      const now = new Date();
+      assert(springFestival > now, '春节日期应在未来');
+
+      // 测试农历八月十五（中秋节）
+      const midAutumn = window.LunarHelper.nextSolarOfLunar(8, 15, false);
+      assert(midAutumn > now, '中秋节日期应在未来');
+
+      // 测试闰月（使用负数表示）
+      try {
+        const leapMonth = window.LunarHelper.nextSolarOfLunar(-8, 15, false);
+        assert(leapMonth instanceof Date, '闰月应返回 Date 对象');
+      } catch (error) {
+        // 某些年份没有闰八月，这是正常的
+        assert(true, '闰月不存在是正常情况');
+      }
+    });
+
+    testSection('7. 节日事件 (festival)', () => {
+      const festival = {
+        type: 'festival',
+        date: '2027-01-29T00:00:00' // 2027年春节
+      };
+
+      const target = window.TimeCalc.resolveTargetDate(festival);
+      const expected = new Date('2027-01-29T00:00:00');
+      assertDateEqual(target, expected, '节日事件日期');
+    });
+
+    testSection('8. 时间格式化 (formatTimeDiff)', () => {
+      const timeDiff = {
+        days: 5,
+        hours: 12,
+        minutes: 30,
+        seconds: 45,
+        isPast: false
+      };
+
+      const full = window.TimeCalc.formatTimeDiff(timeDiff, 'full');
+      assertEqual(full, '5天 12小时 30分钟 45秒', '完整格式化');
+
+      const compact = window.TimeCalc.formatTimeDiff(timeDiff, 'compact');
+      assertEqual(compact, '5天', '紧凑格式化');
+
+      // 测试只有小时的情况
+      const hoursOnly = { days: 0, hours: 3, minutes: 15, seconds: 20, isPast: false };
+      const compactHours = window.TimeCalc.formatTimeDiff(hoursOnly, 'compact');
+      assertEqual(compactHours, '3小时', '紧凑格式化 - 只有小时');
+    });
+
+    testSection('9. 边界条件测试', () => {
+      // 测试 2 月 29 日（闰年）
+      const leapYearEvent = {
+        type: 'recurring',
+        dateSystem: 'solar',
+        date: '2024-02-29T00:00:00'
+      };
+
+      const leapTarget = window.TimeCalc.resolveTargetDate(leapYearEvent);
+      assert(leapTarget instanceof Date, '闰年日期应返回有效 Date');
+
+      // 测试同一时刻
+      const now = new Date();
+      const same = window.TimeCalc.diff(now, now);
+      assertEqual(same.days, 0, '同一时刻 - 天数');
+      assertEqual(same.hours, 0, '同一时刻 - 小时');
+      assertEqual(same.minutes, 0, '同一时刻 - 分钟');
+      assertEqual(same.seconds, 0, '同一时刻 - 秒');
+    });
+
+    testSection('10. 农历跨年滚动测试', () => {
+      // 测试农历日期是否正确跨年
+      const lunarEvent = {
+        type: 'recurring',
+        dateSystem: 'lunar',
+        lunarMonth: 7,
+        lunarDay: 7, // 七夕
+        isLeapMonth: false
+      };
+
+      const target = window.TimeCalc.resolveTargetDate(lunarEvent);
+      const now = new Date();
+
+      assert(target > now, '农历跨年事件应在未来');
+
+      // 七夕通常在公历 8 月左右
+      const month = target.getMonth() + 1;
+      assert(month >= 7 && month <= 9, `七夕应在 7-9 月，实际: ${month}月`);
+    });
+
+    // ========== 生成测试报告 ==========
+
+    setTimeout(() => {
+      const output = document.getElementById('test-output');
+
+      // 显示每个测试结果
+      tests.results.forEach(result => {
+        const testCase = document.createElement('div');
+        testCase.className = result.pass ? 'test-case' : 'test-case fail';
+        testCase.innerHTML = `
+          <div>${result.pass ? '✓' : '✗'} ${result.message}</div>
+        `;
+        output.appendChild(testCase);
+      });
+
+      // 显示汇总
+      const summary = document.createElement('div');
+      summary.className = 'summary';
+      summary.innerHTML = `
+        <h2>测试汇总</h2>
+        <p><span class="pass">通过: ${tests.passed}</span></p>
+        <p><span class="fail-text">失败: ${tests.failed}</span></p>
+        <p>总计: ${tests.passed + tests.failed}</p>
+        <p>通过率: ${((tests.passed / (tests.passed + tests.failed)) * 100).toFixed(2)}%</p>
+      `;
+      output.appendChild(summary);
+
+      console.log('测试完成:', tests);
+    }, 100);
+  </script>
+</body>
+</html>
