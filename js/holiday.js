@@ -46,9 +46,16 @@ function groupByName(raw) {
     const { name, date, isOffDay } = holiday;
     if (!name || !date) continue;
 
-    if (!grouped.has(name) || date < grouped.get(name).date) {
+    if (!grouped.has(name)) {
       grouped.set(name, { date, isOffDay: !!isOffDay });
+      continue;
     }
+
+    const current = grouped.get(name);
+    if (date < current.date) {
+      current.date = date;
+    }
+    current.isOffDay = current.isOffDay || !!isOffDay;
   }
 
   return grouped;

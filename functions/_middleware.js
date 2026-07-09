@@ -5,7 +5,12 @@ const PUBLIC_PATHS = ['/api/login', '/api/logout', '/api/session', '/api/config'
 export async function onRequest({ request, next, env }) {
   const url = new URL(request.url);
 
-  // Allow public paths without auth
+  // Only protect API routes. Static pages (including password.html) must remain reachable.
+  if (!url.pathname.startsWith('/api/')) {
+    return next();
+  }
+
+  // Allow public API paths without auth
   if (PUBLIC_PATHS.some(p => url.pathname === p || url.pathname.startsWith(p + '/'))) {
     return next();
   }

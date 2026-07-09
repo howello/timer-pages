@@ -22,7 +22,7 @@ async function hmacSha256Raw(key, str) {
 }
 
 async function getSigningKey(secret, dateStr, region) {
-  const kDate = await hmacSha256Raw('OSS4-HMAC-SHA256' + secret, dateStr);
+  const kDate = await hmacSha256Raw('aliyun_v4' + secret, dateStr);
   const kRegion = await hmacSha256Raw(kDate, region);
   const kService = await hmacSha256Raw(kRegion, 'oss');
   return await hmacSha256Raw(kService, 'aliyun_v4_request');
