@@ -608,3 +608,88 @@ textarea:focus {
     transition-duration: 0.001ms !important;
   }
 }
+
+/* ========== app runtime styles ========== */
+
+/* 初始隐藏，滚动后显现 */
+.scroll-reveal,
+.revealed-list {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity .45s ease, transform .45s ease;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+.scroll-reveal.is-visible,
+.revealed-list.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+  visibility: visible;
+}
+
+/* 拖动中样式 */
+.list-card.is-dragging {
+  opacity: .55;
+  box-shadow: var(--fluff-shadow);
+  z-index: 5;
+}
+
+/* 卡片信息/走动时间/备注 */
+.list-card .card-info {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.list-card .card-info h3 {
+  margin: 0 0 4px;
+  font-size: 1.05rem;
+}
+
+.list-card .running-time {
+  font-family: "SF Mono", "Cascadia Code", ui-monospace, monospace;
+  font-size: .9rem;
+  color: var(--muted);
+  margin: 4px 0;
+}
+
+.list-card .card-note {
+  margin: 4px 0 0;
+  font-size: .85rem;
+  color: var(--muted);
+}
+
+/* 置顶/编辑/删除按钮（列表卡片中） */
+.list-card .pin-button,
+.list-card .soft-icon-button {
+  flex-shrink: 0;
+}
+
+/* Toast 提示 */
+.app-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 32px;
+  transform: translateX(-50%) translateY(16px);
+  opacity: 0;
+  background: rgba(255, 250, 240, .92);
+  box-shadow: var(--fluff-shadow);
+  transition: opacity .3s ease, transform .3s ease;
+  z-index: 200;
+}
+
+.app-toast.is-visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* 弹窗遮罩居中 */
+.modal-backdrop {
+  align-items: center;
+  justify-content: center;
+  z-index: 120;
+}
+
+/* 隐藏字段 */
+/* (字段显示/隐藏由 modal.js 直接设置 style.display) */
