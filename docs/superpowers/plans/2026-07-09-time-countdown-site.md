@@ -2,6 +2,7 @@
 change: build-time-countdown-site
 design-doc: docs/superpowers/specs/2026-07-09-time-countdown-site-design.md
 base-ref: 6334824b61dc1291e0f1768a135c38fda7f4090f
+archived-with: 2026-07-09-build-time-countdown-site
 ---
 
 # 时间倒计时静态网站 — 实施计划
@@ -31,6 +32,7 @@ base-ref: 6334824b61dc1291e0f1768a135c38fda7f4090f
 - **响应式适配**：PC/手机端同时适配
 - **节假日置顶/排序方案**：节假日用稳定合成 ID（`festival:<name>`），只存 `holidayMeta` 覆盖状态
 
+archived-with: 2026-07-09-build-time-countdown-site
 ---
 
 ### Task 1: 项目骨架与基础设施
@@ -89,6 +91,7 @@ git commit -m "feat: add project skeleton
 - README.md"
 ```
 
+archived-with: 2026-07-09-build-time-countdown-site
 ---
 
 ### Task 2: 密码访问控制（access-gate）
@@ -109,6 +112,7 @@ git add js/access-gate.js
 git commit -m "feat: implement password access control"
 ```
 
+archived-with: 2026-07-09-build-time-countdown-site
 ---
 
 ### Task 3: 时间计算核心（time-calc + lunar）
@@ -128,6 +132,7 @@ git add js/time-calc.js js/lunar.js
 git commit -m "feat: implement time calculation and lunar conversion"
 ```
 
+archived-with: 2026-07-09-build-time-countdown-site
 ---
 
 ### Task 4: 节假日数据接入（holiday）
@@ -147,6 +152,7 @@ git add js/holiday.js
 git commit -m "feat: implement holiday API integration"
 ```
 
+archived-with: 2026-07-09-build-time-countdown-site
 ---
 
 ### Task 5: OSS 存储读写（oss-storage）
@@ -166,6 +172,7 @@ git add js/oss-storage.js
 git commit -m "feat: implement OSS storage read/write"
 ```
 
+archived-with: 2026-07-09-build-time-countdown-site
 ---
 
 ### Task 6: 事件数据中心（store）
@@ -185,6 +192,7 @@ git add js/store.js
 git commit -m "feat: implement event data store"
 ```
 
+archived-with: 2026-07-09-build-time-countdown-site
 ---
 
 ### Task 7: 卡片渲染与主页交互（card-render + modal + home）
@@ -204,6 +212,7 @@ git add js/card-render.js js/modal.js js/home.js
 git commit -m "feat: implement card rendering and home interactions"
 ```
 
+archived-with: 2026-07-09-build-time-countdown-site
 ---
 
 ### Task 8: 部署手册
@@ -220,6 +229,7 @@ git add docs/deployment-guide.md
 git commit -m "docs: add deployment guide"
 ```
 
+archived-with: 2026-07-09-build-time-countdown-site
 ---
 
 ## 执行说明

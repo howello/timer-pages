@@ -2,6 +2,8 @@
 comet_change: build-time-countdown-site
 role: technical-design
 canonical_spec: openspec
+archived-with: 2026-07-09-build-time-countdown-site
+status: final
 ---
 
 # 时间倒计时静态网站 — 技术设计

@@ -76,7 +76,7 @@ sed -i "s/__OSS_OBJECT_KEY__/$OSS_OBJECT_KEY/g" js/config.js
 |--------|------|------|
 | `PASSWORD` | 网站访问密码 | `123456` |
 | `OSS_REGION` | OSS Bucket 所在区域 | `oss-cn-hangzhou` |
-| `OSS_BUCKET` | OSS Bucket 名称 | `countdown-data-xxx` |
+| `OSS_BUCKET` | OSS Bucket 名称 | `howe-file` |
 | `OSS_AK` | RAM 子账号 AccessKey ID | `LTAI...` |
 | `OSS_SK` | RAM 子账号 AccessKey Secret | `xxxx` |
 | `OSS_OBJECT_KEY` | OSS 中存储事件数据的 JSON 文件名 | `countdown-data.json` |
@@ -93,13 +93,13 @@ sed -i "s/__OSS_OBJECT_KEY__/$OSS_OBJECT_KEY/g" js/config.js
 
 1. 登录 [阿里云 OSS 控制台](https://oss.console.aliyun.com)
 2. 创建 Bucket：
-   - 名称：`countdown-data-xxx`（全局唯一）
+   - 名称：`howe-file`（全局唯一）
    - 地域：选择离用户近的区域（如 `oss-cn-hangzhou`）
    - 存储类型：标准存储
    - **访问权限**：**公共读**（用户浏览器需要读取 JSON）
 3. 配置 CORS：
    - 新建规则：
-     - AllowedOrigins: `https://你的站点.pages.dev`
+     - AllowedOrigins: `https://timer.wyantao.com`
      - AllowedMethods: `GET, PUT, POST, DELETE`
      - AllowedHeaders: `*`
      - ExposeHeaders: `ETag, x-oss-request-id`
@@ -111,7 +111,7 @@ sed -i "s/__OSS_OBJECT_KEY__/$OSS_OBJECT_KEY/g" js/config.js
 
 1. 进入 [RAM 控制台](https://ram.console.aliyun.com)
 2. 创建用户：
-   - 名称：`countdown-oss-user`
+   - 名称：`timer-pages-config`
    - 访问方式：OpenAPI 调用访问（勾选 **程序访问**）
    - 获取 AccessKey ID 和 Secret（**保存好，后续不会再次显示**）
 3. 创建自定义策略：
@@ -127,14 +127,14 @@ sed -i "s/__OSS_OBJECT_KEY__/$OSS_OBJECT_KEY/g" js/config.js
         "oss:PutObject"
       ],
       "Resource": [
-        "acs:oss:*:*:countdown-data-xxx/countdown-data.json"
+        "acs:oss:*:*:howe-file/countdown-data.json"
       ]
     }
   ]
 }
 ```
 
-> ⚠️ 将 `countdown-data-xxx` 替换为你的 Bucket 名，`countdown-data.json` 替换为你的对象名。
+> ⚠️ 将 `howe-file` 替换为你的 Bucket 名，`countdown-data.json` 替换为你的对象名。
 
 4. 授权：将策略绑定到 `countdown-oss-user`
 
@@ -191,7 +191,7 @@ sed -i "s/__OSS_OBJECT_KEY__/$OSS_OBJECT_KEY/g" js/config.js
 - 或使用 `curl`：
 
 ```bash
-curl -X PUT "https://countdown-data-xxx.oss-cn-hangzhou.aliyuncs.com/countdown-data.json" \
+curl -X PUT "https://howe-file.oss-cn-hangzhou.aliyuncs.com/countdown-data.json" \
   -H "Authorization: OSS LTAIxxxxx:xxxxx" \
   -H "Content-Type: application/json" \
   --data-binary @events.json

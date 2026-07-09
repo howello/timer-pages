@@ -4,12 +4,51 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="39029591-db6e-470e-b918-be4d5d6d74e9" name="更改" comment="" />
+    <list default="true" id="39029591-db6e-470e-b918-be4d5d6d74e9" name="更改" comment="">
+      <change beforePath="$PROJECT_DIR$/docs/deployment-guide.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/deployment-guide.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/superpowers/plans/2026-07-09-time-countdown-site.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/superpowers/plans/2026-07-09-time-countdown-site.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/superpowers/specs/2026-07-09-time-countdown-site-design.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/superpowers/specs/2026-07-09-time-countdown-site-design.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/oss-storage.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/js/password.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/openspec/changes/build-time-countdown-site/.comet.yaml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/openspec/changes/build-time-countdown-site/.comet/handoff/brainstorm-summary.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/openspec/changes/build-time-countdown-site/.comet/handoff/design-context.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/openspec/changes/build-time-countdown-site/.comet/handoff/design-context.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/openspec/changes/build-time-countdown-site/.comet/subagent-progress.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/openspec/changes/build-time-countdown-site/.openspec.yaml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/openspec/changes/build-time-countdown-site/design.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/openspec/changes/build-time-countdown-site/proposal.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/openspec/changes/build-time-countdown-site/specs/access-gate/spec.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/openspec/changes/build-time-countdown-site/specs/deployment-guide/spec.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/openspec/changes/build-time-countdown-site/specs/event-cards/spec.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/openspec/changes/build-time-countdown-site/specs/holiday-data/spec.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/openspec/changes/build-time-countdown-site/specs/home-experience/spec.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/openspec/changes/build-time-countdown-site/specs/oss-storage/spec.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/openspec/changes/build-time-countdown-site/tasks.md" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test-access-gate.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test-time-calc.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/test-time-calc.js" beforeDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {
+    "state": "OPEN",
+    "assignee": "howello"
+  }
+}]]></component>
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/howello/timer-pages.git",
+    "accountId": "c40a789a-910f-4443-8360-66a0a536c57a"
+  }
+}]]></component>
   <component name="MacroExpansionManager">
     <option name="directoryName" value="97OApj6M" />
   </component>
@@ -23,10 +62,10 @@
       </MavenGeneralSettings>
     </option>
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 4,
-  "fromUser": false
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 4,
+  &quot;fromUser&quot;: false
+}</component>
   <component name="ProjectId" id="3GFI2i6Zck3hOoE6hZtfbUNp8xM" />
   <component name="ProjectViewState">
     <option name="compactDirectories" value="true" />
@@ -37,13 +76,16 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "Git.Working.Tree.Tab.closed.by.user": "closed",
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.typescript.service.memoryLimit.init": "true",
     "codeWithMe.voiceChat.enabledByDefault": "false",
+    "git-widget-placeholder": "feature/20260709/refine-countdown-site",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "E:/howe/倒计时",
+    "nodejs_package_manager_path": "npm",
     "org.rust.first.attach.projects": "true",
     "settings.editor.selected.configurable": "MavenSettings",
     "vue.rearranger.settings.migration": "true"
@@ -67,11 +109,23 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1758724966832</updated>
-      <workItem from="1783560685964" duration="4039000" />
+      <workItem from="1783560685964" duration="8669000" />
+      <workItem from="1783576624783" duration="19954000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
 </project>
