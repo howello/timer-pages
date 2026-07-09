@@ -1,6 +1,6 @@
 ## 1. 项目骨架与基础设施
 
-- [ ] 1.1 创建目录结构：根目录 HTML 页面、`css/`、`js/`、`js/lib/`（本地兜底可选）
+- [x] 1.1 创建目录结构：根目录 HTML 页面、`css/`、`js/`、`js/lib/`（本地兜底可选）
 - [ ] 1.2 建立 CDN 引入清单（`lunar-javascript`、`aliyun-oss-sdk-6.18.0`），在页面中引入
 - [ ] 1.3 从 `docs/fluffy-time-design/css/fluffy.css` 抽取并落地基础设计系统样式到 `css/`（毛玻璃/奶油/新拟态变量与组件）
 - [ ] 1.4 建立运行期配置读取方案（Cloudflare Pages 环境变量注入：密码、OSS 参数）与 `config.js` 占位

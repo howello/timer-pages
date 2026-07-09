@@ -48,13 +48,13 @@ base-ref: 6334824b61dc1291e0f1768a135c38fda7f4090f
   - `window.APP_CONFIG = { password: string, oss: {region, bucket, accessKeyId, accessKeySecret, objectKey} }`（config.js 导出）
   - 目录结构：`css/`、`js/`、根目录 HTML
 
-- [ ] **Step 1.1: 创建目录结构**
+- [x] **Step 1.1: 创建目录结构**
 
 ```bash
 mkdir -p css js
 ```
 
-- [ ] **Step 1.2: 创建 index.html 骨架**
+- [x] **Step 1.2: 创建 index.html 骨架**
 
 ```html
 <!doctype html>
