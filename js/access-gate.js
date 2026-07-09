@@ -95,16 +95,23 @@
   }
 
   /**
-   * 主页守卫：未通过认证则跳转到密码页
+   * 主页守卫：必须通过服务端会话校验才放行
+   * @returns {Promise<boolean>} 会话是否有效
    */
   function requireAuth() {
-    if (!isAuthed()) {
-      var returnUrl = window.location.pathname + window.location.search + window.location.hash;
-      if (returnUrl !== '/password.html') {
-        sessionStorage.setItem('countdown_return_url', returnUrl);
+    return checkSession().then(function(valid) {
+      if (!valid) {
+        clearAuthed();
+        var returnUrl = window.location.pathname + window.location.search + window.location.hash;
+        if (returnUrl !== '/password.html') {
+          sessionStorage.setItem('countdown_return_url', returnUrl);
+        }
+        window.location.href = '/password.html';
+        return false;
       }
-      window.location.href = '/password.html';
-    }
+      setAuthed();
+      return true;
+    });
   }
 
   /**

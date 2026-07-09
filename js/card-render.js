@@ -77,7 +77,7 @@
     } else {
       tags.push('公历');
     }
-    if (card.isStatutory) {
+    if (card.isOffDay) {
       tags.push('法定节假日');
     }
     if (card.highwayFree) {
@@ -159,9 +159,51 @@
     }
 
     fixedCards.forEach(function (card) {
-      var article = createCard(card, { isFixed: true });
-      // 固定卡片不用拖拽/置顶/编辑（固定区只展示）
-      article.setAttribute('draggable', 'false');
+      // 固定卡片使用简化版 DOM，不包含拖拽/编辑/删除按钮
+      var article = document.createElement('article');
+      article.className = 'feature-card glass-fluff ' + (COLOR_MAP[card.type] || 'mint');
+      article.setAttribute('data-id', card.id);
+
+      var info = document.createElement('div');
+      info.className = 'card-info';
+
+      var title = document.createElement('h3');
+      title.textContent = card.title || card.name || '未命名';
+      info.appendChild(title);
+
+      // 标签：类型 + 日期体系 + 法定节假日 + 高速免费
+      var meta = document.createElement('p');
+      var tags = [];
+      tags.push(TYPE_LABELS[card.type] || card.type);
+      if (card.calendar === 'lunar') {
+        tags.push('农历');
+      } else {
+        tags.push('公历');
+      }
+      if (card.isOffDay) {
+        tags.push('法定节假日');
+      }
+      if (card.highwayFree) {
+        tags.push('高速免费');
+      }
+      meta.textContent = tags.join(' · ');
+      info.appendChild(meta);
+
+      // 走动时间显示
+      var timeDiv = document.createElement('div');
+      timeDiv.className = 'running-time';
+      timeDiv.textContent = '-- 天 --:--:--';
+      info.appendChild(timeDiv);
+
+      // 备注
+      if (card.note) {
+        var note = document.createElement('p');
+        note.className = 'card-note';
+        note.textContent = card.note;
+        info.appendChild(note);
+      }
+
+      article.appendChild(info);
       container.appendChild(article);
     });
   }

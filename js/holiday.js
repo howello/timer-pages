@@ -35,19 +35,19 @@ function fetchHolidays(year) {
 }
 
 /**
- * 按节假日名称分组，取每个节假日的最早日期
+ * 按节假日名称分组,取每个节假日的最早日期和isOffDay
  * @param {Array} raw - 原始节假日数据数组
- * @returns {Map<string, string>} Map<name, earliestDate>
+ * @returns {Map<string, {date: string, isOffDay: boolean}>} Map<name, {date, isOffDay}>
  */
 function groupByName(raw) {
   const grouped = new Map();
 
   for (const holiday of raw) {
-    const { name, date } = holiday;
+    const { name, date, isOffDay } = holiday;
     if (!name || !date) continue;
 
-    if (!grouped.has(name) || date < grouped.get(name)) {
-      grouped.set(name, date);
+    if (!grouped.has(name) || date < grouped.get(name).date) {
+      grouped.set(name, { date, isOffDay: !!isOffDay });
     }
   }
 

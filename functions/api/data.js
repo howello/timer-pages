@@ -91,8 +91,11 @@ export async function onRequestGet({ request, env }) {
   const { parseCookie, verifySession } = await import('./_utils.js');
   const cookie = parseCookie(request.headers.get('Cookie') || '');
   const token = cookie.cd_session;
-  const sessionSecret = env.SESSION_SECRET || 'fallback-secret-do-not-use-in-production';
-  const session = await verifySession(token, sessionSecret);
+  if (!env.SESSION_SECRET || env.SESSION_SECRET === '') {
+    return new Response(JSON.stringify({ error: 'configuration error' }), { status: 500 });
+  }
+
+  const session = await verifySession(token, env.SESSION_SECRET);
   if (!session) {
     return new Response(JSON.stringify({ error: 'unauthorized' }), { status: 401 });
   }
@@ -129,8 +132,11 @@ export async function onRequestPut({ request, env }) {
   const { parseCookie, verifySession } = await import('./_utils.js');
   const cookie = parseCookie(request.headers.get('Cookie') || '');
   const token = cookie.cd_session;
-  const sessionSecret = env.SESSION_SECRET || 'fallback-secret-do-not-use-in-production';
-  const session = await verifySession(token, sessionSecret);
+  if (!env.SESSION_SECRET || env.SESSION_SECRET === '') {
+    return new Response(JSON.stringify({ error: 'configuration error' }), { status: 500 });
+  }
+
+  const session = await verifySession(token, env.SESSION_SECRET);
   if (!session) {
     return new Response(JSON.stringify({ error: 'unauthorized' }), { status: 401 });
   }

@@ -13,9 +13,14 @@ export async function onRequest({ request, next, env }) {
   // Check session cookie
   const cookie = parseCookie(request.headers.get('Cookie') || '');
   const token = cookie.cd_session;
-  const sessionSecret = env.SESSION_SECRET || 'fallback-secret-do-not-use-in-production';
+  if (!env.SESSION_SECRET || env.SESSION_SECRET === '') {
+    return new Response(JSON.stringify({ error: 'configuration error' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
 
-  if (!token || !(await verifySession(token, sessionSecret))) {
+  if (!token || !(await verifySession(token, env.SESSION_SECRET))) {
     return new Response(JSON.stringify({ error: 'unauthorized' }), {
       status: 401,
       headers: { 'Content-Type': 'application/json' }

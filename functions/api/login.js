@@ -47,9 +47,15 @@ export async function onRequestPost({ request, env }) {
   }
 
   // Create session
-  const sessionSecret = env.SESSION_SECRET || 'fallback-secret-do-not-use-in-production';
+  if (!env.SESSION_SECRET || env.SESSION_SECRET === '') {
+    return new Response(JSON.stringify({ ok: false, error: '配置错误' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    });
+  }
+
   const payload = { exp: Date.now() + 86400000, v: 1 };
-  const token = await createSession(payload, sessionSecret);
+  const token = await createSession(payload, env.SESSION_SECRET);
 
   return new Response(JSON.stringify({ ok: true }), {
     status: 200,

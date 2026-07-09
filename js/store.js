@@ -30,7 +30,7 @@
 
       // 3. 生成节假日卡片
       const holidayCards = [];
-      for (const [name, date] of groupedHolidays) {
+      for (const [name, {date, isOffDay}] of groupedHolidays) {
         const id = `festival:${name}`;
         const meta = holidayMeta[id] || {};
 
@@ -39,6 +39,7 @@
           name: name,
           date: date,
           type: 'festival',
+          isOffDay: isOffDay,
           highwayFree: isHighwayFree(name),
           pinned: meta.pinned || false,
           order: meta.order !== undefined ? meta.order : 9999
@@ -256,7 +257,7 @@
 
     // 重新生成节假日卡片
     const holidayCards = [];
-    for (const [name, date] of groupedHolidays) {
+    for (const [name, {date, isOffDay}] of groupedHolidays) {
       const id = `festival:${name}`;
       const meta = holidayMeta[id] || {};
 
@@ -265,6 +266,7 @@
         name: name,
         date: date,
         type: 'festival',
+        isOffDay: isOffDay,
         highwayFree: isHighwayFree(name),
         pinned: meta.pinned || false,
         order: meta.order !== undefined ? meta.order : 9999

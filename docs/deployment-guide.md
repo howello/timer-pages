@@ -208,7 +208,7 @@ wrangler pages dev . --binding PASSWORD=test123 --binding SESSION_SECRET=dev-sec
 A: `api.jiejiariapi.com` 可能限制某些年份数据。模块已实现降级，空数据不阻塞。
 
 **Q: 密码输入正确但无法进入？**
-A: 检查 `SESSION_SECRET` 环境变量是否已配置。如未配置，HMAC 签名密钥会使用硬编码回退值。
+A: 检查 `PASSWORD` 和 `SESSION_SECRET` 环境变量是否已配置。`SESSION_SECRET` 缺失时系统会返回配置错误，不会签发会话 Cookie。
 
 **Q: OSS 写入失败？**
 A: 检查：

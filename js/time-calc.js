@@ -44,16 +44,22 @@ function resolveTargetDate(event) {
   }
 
   const type = event.type;
-  const dateSystem = event.dateSystem || DateSystem.SOLAR;
+  const dateSystem = event.calendar || event.dateSystem || DateSystem.SOLAR;
 
   switch (type) {
     case EventType.COUNTDOWN:
-      // 倒计时：直接使用 event.date
-      return parseDate(event.date);
+      // 倒计时：公历直接使用 event.date；农历先换算为对应公历日
+      if (dateSystem === DateSystem.LUNAR) {
+        return resolveSpecificLunarDate(event);
+      }
+      return parseEventSolarDate(event);
 
     case EventType.ELAPSED:
-      // 正计时：使用 event.date 作为起点
-      return parseDate(event.date);
+      // 正计时：公历直接使用 event.date；农历先换算为对应公历日
+      if (dateSystem === DateSystem.LUNAR) {
+        return resolveSpecificLunarDate(event);
+      }
+      return parseEventSolarDate(event);
 
     case EventType.RECURRING:
       // 周期性事件：根据日期体系求下次发生日
@@ -80,6 +86,35 @@ function resolveTargetDate(event) {
     default:
       throw new Error(`不支持的事件类型: ${type}`);
   }
+}
+
+/**
+ * 将指定农历年月日换算为公历日期
+ * countdown/elapsed 使用固定农历年份，不做下一次滚动
+ * @param {Object} event
+ * @returns {Date}
+ */
+function resolveSpecificLunarDate(event) {
+  if (!window.LunarHelper || !window.LunarHelper.getLunarDate) {
+    throw new Error('农历转换模块未加载');
+  }
+
+  const year = event.lunarYear || new Date().getFullYear();
+  const month = event.lunarMonth || 1;
+  const day = event.lunarDay || 1;
+  const isLeap = event.isLeapMonth || false;
+  const date = window.LunarHelper.getLunarDate(year, month, day, isLeap);
+
+  if (!date) {
+    throw new Error(`无法换算农历 ${year} 年 ${isLeap ? '闰' : ''}${month} 月 ${day} 日`);
+  }
+
+  if (event.time) {
+    const parts = event.time.split(':');
+    date.setHours(parseInt(parts[0] || '0', 10), parseInt(parts[1] || '0', 10), 0, 0);
+  }
+
+  return date;
 }
 
 /**
@@ -110,6 +145,20 @@ function diff(now, target) {
     seconds,
     isPast
   };
+}
+
+/**
+ * 解析事件公历日期，并合并 event.time
+ * @param {Object} event
+ * @returns {Date}
+ */
+function parseEventSolarDate(event) {
+  const date = parseDate(event.date);
+  if (event.time) {
+    const parts = event.time.split(':');
+    date.setHours(parseInt(parts[0] || '0', 10), parseInt(parts[1] || '0', 10), 0, 0);
+  }
+  return date;
 }
 
 /**

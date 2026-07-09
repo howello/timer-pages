@@ -12,17 +12,27 @@
   function init() {
     reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    if (window.AccessGate && window.AccessGate.requireAuth) {
-      window.AccessGate.requireAuth();
+    function startApp() {
+      bindScrollReveal();
+      bindHeaderActions();
+      bindModalSubmit();
+      updateCurrentTime();
+      setInterval(updateCurrentTime, 1000);
+
+      if (window.loadAppConfig) {
+        window.loadAppConfig().then(loadAndRender);
+      } else {
+        loadAndRender();
+      }
     }
 
-    bindScrollReveal();
-    bindHeaderActions();
-    bindModalSubmit();
-    updateCurrentTime();
-    setInterval(updateCurrentTime, 1000);
-
-    loadAndRender();
+    if (window.AccessGate && window.AccessGate.requireAuth) {
+      window.AccessGate.requireAuth().then(function (valid) {
+        if (valid) startApp();
+      });
+    } else {
+      startApp();
+    }
   }
 
   async function loadAndRender() {
