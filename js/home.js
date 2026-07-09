@@ -1,15 +1,17 @@
 /**
  * 主页装配模块
- * 负责初始化、滚动动画、置顶、拖拽、新增/编辑/删除
+ * 负责初始化、滚动动画（window.scrollY）、置顶、拖拽、新增/编辑/删除
  */
 (function (window) {
   'use strict';
 
   var cards = [];
   var draggedId = null;
+  var reduceMotion = false;
 
   function init() {
-    // 主页守卫
+    reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
     if (window.AccessGate && window.AccessGate.requireAuth) {
       window.AccessGate.requireAuth();
     }
@@ -48,24 +50,22 @@
   }
 
   function bindScrollReveal() {
-    var shell = document.querySelector('.home-scroll');
-    var revealEls = document.querySelectorAll('.scroll-reveal, .revealed-list');
-    if (!shell) return;
+    var header = document.getElementById('floating-header');
+    var revealed = document.getElementById('revealed-list');
 
-    var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (reduceMotion) {
-      revealEls.forEach(function (el) { el.classList.add('is-visible'); });
+      if (header) header.classList.add('is-visible');
+      if (revealed) revealed.classList.add('is-visible');
       return;
     }
 
     function update() {
-      var show = shell.scrollTop > 80;
-      revealEls.forEach(function (el) {
-        el.classList.toggle('is-visible', show);
-      });
+      var show = window.scrollY > 80;
+      if (header) header.classList.toggle('is-visible', show);
+      if (revealed) revealed.classList.toggle('is-visible', show);
     }
 
-    shell.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('scroll', update, { passive: true });
     update();
   }
 
@@ -191,6 +191,28 @@
         alert('排序失败：' + error.message);
       }
     });
+
+    // 触屏拖拽兼容层
+    list.querySelectorAll('.list-card').forEach(function (cardEl) {
+      cardEl.addEventListener('touchstart', function (e) {
+        cardEl.setAttribute('data-touch-y', e.touches[0].clientY);
+      }, { passive: true });
+
+      cardEl.addEventListener('touchmove', function (e) {
+        var target = document.elementFromPoint(e.touches[0].clientX, e.touches[0].clientY);
+        var overCard = target ? target.closest('.list-card') : null;
+        if (overCard && overCard !== cardEl) {
+          e.preventDefault();
+          var rect = overCard.getBoundingClientRect();
+          var before = e.touches[0].clientY < rect.top + rect.height / 2;
+          if (before) {
+            list.insertBefore(cardEl, overCard);
+          } else {
+            list.insertBefore(cardEl, overCard.nextSibling);
+          }
+        }
+      }, { passive: false });
+    });
   }
 
   function updateCurrentTime() {
@@ -205,9 +227,7 @@
     toast.className = 'soft-status app-toast';
     toast.textContent = message;
     document.body.appendChild(toast);
-    setTimeout(function () {
-      toast.classList.add('is-visible');
-    }, 10);
+    setTimeout(function () { toast.classList.add('is-visible'); }, 10);
     setTimeout(function () {
       toast.classList.remove('is-visible');
       setTimeout(function () { toast.remove(); }, 300);

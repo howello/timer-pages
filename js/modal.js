@@ -1,99 +1,86 @@
 /**
  * 新增/编辑弹窗模块
- * 表单支持 4 类事件 + 公历/农历动态字段
+ * 支持 4 类事件 + 公历/农历分段控件切换
  */
 (function (window) {
   'use strict';
 
   var backdrop = null;
-  var modal = null;
-  var title = null;
   var form = null;
-  var currentEditEvent = null; // 编辑中的事件对象
-
-  var submitCallback = null; // onSubmit(cb) 注册的回调
-
-  // 字段元素缓存
+  var currentEditEvent = null;
+  var submitCallback = null;
   var fields = {};
 
   function ensureElements() {
     if (backdrop) return;
     backdrop = document.getElementById('modal-backdrop');
-    modal = document.querySelector('.add-event-modal');
-    title = document.getElementById('modal-title');
     form = document.getElementById('event-form');
 
-    if (backdrop) {
-      var inputs = backdrop.querySelectorAll('input, select, textarea');
+    if (form) {
+      var inputs = form.querySelectorAll('input, select, textarea');
       inputs.forEach(function (el) {
         if (el.name) fields[el.name] = el;
       });
 
-      // 日期体系切换（checkbox -> solar/lunar）
-      if (fields.isLunar) {
-        fields.isLunar.addEventListener('change', toggleCalendar);
-      }
-      // 提交
-      if (form) {
-        form.addEventListener('submit', handleSubmit);
-      }
-      // 取消
+      // 分段控件（公历/农历切换）
+      var segOptions = document.querySelectorAll('.seg-option');
+      segOptions.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          segOptions.forEach(function (b) { b.classList.remove('active'); });
+          btn.classList.add('active');
+          toggleCalendarFields(btn.getAttribute('data-value') === 'lunar');
+        });
+      });
+
+      form.addEventListener('submit', handleSubmit);
+
       var cancelBtn = document.getElementById('cancel-btn');
       if (cancelBtn) cancelBtn.addEventListener('click', close);
-      // 关闭按钮
+
       var closeBtn = document.getElementById('close-modal-btn');
       if (closeBtn) closeBtn.addEventListener('click', close);
-      // 点击遮罩关闭
+
       backdrop.addEventListener('click', function (e) {
         if (e.target === backdrop) close();
       });
     }
+
+    var titleEl = document.getElementById('modal-title');
+    if (titleEl) fields._title = titleEl;
   }
 
-  function toggleCalendar() {
-    var isLunar = !!fields.isLunar && fields.isLunar.checked;
-    var solarFields = ['targetDate', 'targetTime'];
-    var lunarFields = ['lunarYear', 'lunarMonth', 'lunarDay', 'isLeapMonth'];
-
-    solarFields.forEach(function (name) {
-      if (fields[name]) fields[name].style.display = isLunar ? 'none' : '';
-    });
-    lunarFields.forEach(function (name) {
-      if (fields[name]) fields[name].style.display = isLunar ? '' : 'none';
-    });
+  function toggleCalendarFields(isLunar) {
+    var solarFields = document.querySelectorAll('.solar-field');
+    var lunarFields = document.querySelectorAll('.lunar-field');
+    solarFields.forEach(function (el) { el.style.display = isLunar ? 'none' : ''; });
+    lunarFields.forEach(function (el) { el.style.display = isLunar ? '' : 'none'; });
   }
 
   function show() {
     ensureElements();
-    if (!backdrop) {
-      console.warn('Modal: backdrop not found in DOM');
-      return;
-    }
-    backdrop.style.display = 'flex';
+    if (!backdrop) return;
+    backdrop.style.display = 'grid';
   }
 
   function close() {
-    ensureElements();
     if (!backdrop) return;
     backdrop.style.display = 'none';
     currentEditEvent = null;
     if (form) form.reset();
-    if (fields.isLunar) {
-      fields.isLunar.checked = false;
-      toggleCalendar();
-    }
+    var solarBtns = document.querySelectorAll('.seg-option');
+    solarBtns.forEach(function (b, i) { b.classList.toggle('active', i === 0); });
+    toggleCalendarFields(false);
   }
 
   function openCreate() {
     ensureElements();
     currentEditEvent = null;
-    if (title) title.textContent = '新增事件';
+    if (fields._title) fields._title.textContent = '新增事件';
     if (form) form.reset();
-    if (fields.isLunar) {
-      fields.isLunar.checked = false;
-      toggleCalendar();
-    }
-    // 默认日期：今天
+    var solarBtns = document.querySelectorAll('.seg-option');
+    solarBtns.forEach(function (b, i) { b.classList.toggle('active', i === 0); });
+    toggleCalendarFields(false);
+
     if (fields.targetDate) {
       var today = new Date();
       var yyyy = today.getFullYear();
@@ -107,63 +94,64 @@
   function openEdit(event) {
     ensureElements();
     currentEditEvent = event;
-    if (title) title.textContent = '编辑事件';
+    if (fields._title) fields._title.textContent = '编辑事件';
     if (!form) return;
 
-    // 回填字段
-    if (fields.title) fields.title.value = event.title || '';
+    if (fields.title) fields.title.value = event.title || event.name || '';
     if (fields.targetDate) fields.targetDate.value = event.date || '';
     if (fields.targetTime) fields.targetTime.value = event.time || '00:00';
     if (fields.note) fields.note.value = event.note || '';
-    // isLunar
+
     var isLunar = event.calendar === 'lunar';
-    if (fields.isLunar) {
-      fields.isLunar.checked = isLunar;
-      toggleCalendar();
-    }
+    var solarBtns = document.querySelectorAll('.seg-option');
+    solarBtns.forEach(function (b) { b.classList.remove('active'); });
+    if (isLunar && solarBtns[1]) solarBtns[1].classList.add('active');
+    else if (solarBtns[0]) solarBtns[0].classList.add('active');
+    toggleCalendarFields(isLunar);
+
     if (fields.lunarYear) fields.lunarYear.value = event.lunarYear || '';
     if (fields.lunarMonth) fields.lunarMonth.value = event.lunarMonth || '';
     if (fields.lunarDay) fields.lunarDay.value = event.lunarDay || '';
     if (fields.isLeapMonth) fields.isLeapMonth.value = String(event.isLeapMonth || false);
-    if (fields.cardColor) {
-      var color = event.cardColor || 'mint';
-      var opts = fields.cardColor.options;
-      for (var i = 0; i < opts.length; i++) {
-        if (opts[i].value === color) { fields.cardColor.selectedIndex = i; break; }
+
+    // 事件类型
+    if (fields.type) {
+      var typeVal = event.type || 'countdown';
+      var typeOpts = fields.type.options;
+      for (var i = 0; i < typeOpts.length; i++) {
+        if (typeOpts[i].value === typeVal) { fields.type.selectedIndex = i; break; }
       }
     }
     show();
   }
 
-  function onSubmit(cb) {
-    submitCallback = cb;
-  }
+  function onSubmit(cb) { submitCallback = cb; }
 
   function handleSubmit(e) {
     e.preventDefault();
     ensureElements();
 
-    var isLunar = !!fields.isLunar && fields.isLunar.checked;
-    var isLeap = !!fields.isLeapMonth && fields.isLeapMonth.value === 'true';
+    var solarBtns = document.querySelectorAll('.seg-option');
+    var activeSeg = document.querySelector('.seg-option.active');
+    var isLunar = activeSeg ? activeSeg.getAttribute('data-value') === 'lunar' : false;
 
     var eventData = {
       title: fields.title ? fields.title.value.trim() : '',
-      type: 'countdown',
+      type: fields.type ? fields.type.value : 'countdown',
       calendar: isLunar ? 'lunar' : 'solar',
       date: fields.targetDate ? fields.targetDate.value : '',
       time: fields.targetTime ? fields.targetTime.value : '00:00',
-      note: fields.note ? fields.note.value.trim() : '',
-      cardColor: fields.cardColor ? fields.cardColor.value : 'mint'
+      note: fields.note ? fields.note.value.trim() : ''
     };
 
     if (isLunar) {
       eventData.lunarMonth = fields.lunarMonth ? parseInt(fields.lunarMonth.value, 10) : null;
       eventData.lunarDay = fields.lunarDay ? parseInt(fields.lunarDay.value, 10) : null;
       eventData.lunarYear = fields.lunarYear ? parseInt(fields.lunarYear.value, 10) : null;
-      eventData.isLeapMonth = isLeap;
-      // 农历事件：date 为空，使用 lunar 字段
+      var isLeapStr = fields.isLeapMonth ? fields.isLeapMonth.value : 'false';
+      eventData.isLeapMonth = isLeapStr === 'true';
       if (!eventData.lunarMonth || !eventData.lunarDay) {
-        alert('请完整填写农历月份和日期');
+        alert('请填写农历月份和日期');
         return;
       }
     } else {
@@ -180,12 +168,9 @@
 
     if (submitCallback) {
       submitCallback(eventData, currentEditEvent);
-    } else {
-      console.warn('Modal: no submit callback registered');
     }
   }
 
-  // 导出
   window.Modal = {
     openCreate: openCreate,
     openEdit: openEdit,

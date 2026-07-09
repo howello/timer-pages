@@ -7,147 +7,113 @@
   <link rel="stylesheet" href="css/fluffy.css">
 </head>
 <body>
-  <div class="phone-shell">
-    <div class="phone-status">
-      <span>时光倒计时</span>
-      <span id="current-time">--:--</span>
-    </div>
+  <div class="fluff-haze" aria-hidden="true"></div>
 
-    <div class="fluff-haze"></div>
-
-    <div class="mock-screen home-scroll">
-      <!-- 浮动头部 -->
-      <header class="floating-header glass-fluff scroll-reveal">
+  <main class="cream-canvas">
+    <header class="floating-header glass-fluff scroll-reveal" id="floating-header">
+      <div>
+        <p class="eyebrow">TIME COUNTDOWN</p>
         <h1>时光倒计时</h1>
-        <div class="header-actions">
-          <button class="soft-icon-button" id="add-event-btn" aria-label="添加事件">+</button>
-          <button class="soft-icon-button" id="sync-btn" aria-label="同步" title="同步到云端">☁</button>
+      </div>
+      <div class="header-actions">
+        <button class="soft-icon-button" id="add-event-btn" aria-label="添加事件">+</button>
+        <button class="soft-icon-button" id="sync-btn" aria-label="同步" title="同步到云端">☁</button>
+      </div>
+    </header>
+
+    <section class="fixed-card-stage" id="fixed-card-stage"></section>
+
+    <section class="revealed-list" id="revealed-list">
+      <div class="list-toolbar glass-fluff">
+        <div>
+          <p class="eyebrow">EVENT LIST</p>
+          <h2>时间清单</h2>
         </div>
-      </header>
+        <span class="soft-status">拖动排序 · 置顶优先</span>
+      </div>
+      <div class="sortable-list" id="event-list"></div>
+    </section>
+  </main>
 
-      <!-- 固定卡片区域 -->
-      <section class="fixed-card-stage">
-        <!-- 特色卡片将在这里动态渲染 -->
-      </section>
-
-      <div class="scroll-spacer"></div>
-
-      <!-- 倒计时列表 -->
-      <section class="revealed-list">
-        <div class="list-toolbar glass-fluff">
-          <h2>所有倒计时</h2>
-          <div class="header-actions">
-            <button class="ghost-fluff" id="sort-btn">排序</button>
-          </div>
-        </div>
-
-        <div class="sortable-list" id="event-list">
-          <!-- 事件列表将在这里动态渲染 -->
-        </div>
-      </section>
-    </div>
-  </div>
-
-  <!-- 添加事件弹窗 -->
   <div class="modal-backdrop" id="modal-backdrop" style="display: none;">
-    <div class="add-event-modal glass-fluff">
+    <form class="add-event-modal glass-fluff" id="event-form">
       <div class="modal-head">
-        <h2 id="modal-title">添加倒计时</h2>
-        <button class="soft-icon-button" id="close-modal-btn" aria-label="关闭">×</button>
+        <div>
+          <p class="eyebrow">NEW EVENT</p>
+          <h2 id="modal-title">新增事件</h2>
+        </div>
+        <button class="soft-icon-button" type="button" id="close-modal-btn" aria-label="关闭">×</button>
       </div>
 
-      <form class="modal-grid" id="event-form">
+      <div class="modal-grid">
         <label class="wide-field">
           <span>事件名称</span>
-          <input type="text" name="title" required maxlength="50" placeholder="例如：春节">
+          <input type="text" name="title" required maxlength="50" placeholder="例如：春节、退休">
         </label>
-
         <label>
+          <span>事件类型</span>
+          <select name="type">
+            <option value="countdown">倒计时</option>
+            <option value="recurring">周期性节日</option>
+            <option value="elapsed">已过天数</option>
+          </select>
+        </label>
+        <label>
+          <span>日期体系</span>
+          <div class="segmented-control" id="calendar-switch">
+            <button type="button" class="seg-option active" data-value="solar">公历</button>
+            <button type="button" class="seg-option" data-value="lunar">农历</button>
+          </div>
+        </label>
+        <label class="solar-field">
           <span>目标日期</span>
-          <input type="date" name="targetDate" required>
+          <input type="date" name="targetDate">
         </label>
-
-        <label>
+        <label class="solar-field">
           <span>目标时间</span>
           <input type="time" name="targetTime" value="00:00">
         </label>
-
-        <label class="wide-field switch-row">
-          <span class="switch-label">
-            <input type="checkbox" name="isLunar" id="lunar-toggle">
-            <span>农历日期</span>
-          </span>
-        </label>
-
-        <label class="lunar-field">
+        <label class="lunar-field" style="display:none;">
           <span>农历年份</span>
           <input type="number" name="lunarYear" placeholder="例如：2026">
         </label>
-
-        <label class="lunar-field">
+        <label class="lunar-field" style="display:none;">
           <span>农历月份</span>
           <input type="number" name="lunarMonth" min="1" max="12" placeholder="1-12">
         </label>
-
-        <label class="lunar-field">
+        <label class="lunar-field" style="display:none;">
           <span>农历日期</span>
           <input type="number" name="lunarDay" min="1" max="30" placeholder="1-30">
         </label>
-
-        <label class="lunar-field">
+        <label class="lunar-field" style="display:none;">
           <span>是否闰月</span>
           <select name="isLeapMonth">
             <option value="false">否</option>
             <option value="true">是</option>
           </select>
         </label>
-
-        <label class="wide-field">
-          <span>标签类型</span>
-          <select name="tagType">
-            <option value="">无标签</option>
-            <option value="statutory">法定节假日</option>
-            <option value="custom">自定义</option>
-          </select>
-        </label>
-
-        <label class="wide-field">
-          <span>卡片颜色</span>
-          <select name="cardColor">
-            <option value="coral">珊瑚红</option>
-            <option value="mint">薄荷绿</option>
-            <option value="sky">天空蓝</option>
-          </select>
-        </label>
-
         <label class="wide-field">
           <span>备注</span>
-          <textarea name="description" maxlength="200" placeholder="可选的备注信息"></textarea>
+          <textarea name="note" maxlength="200" placeholder="给这个时间点留一句话"></textarea>
         </label>
-
-        <div class="modal-actions wide-field">
-          <button type="button" class="ghost-fluff" id="cancel-btn">取消</button>
-          <button type="submit" class="primary-fluff" id="submit-btn">保存</button>
-        </div>
-      </form>
-    </div>
+      </div>
+      <div class="modal-actions wide-field">
+        <button type="button" class="ghost-fluff" id="cancel-btn">取消</button>
+        <button type="submit" class="primary-fluff" id="submit-btn">保存</button>
+      </div>
+    </form>
   </div>
 
-  <!-- CDN 依赖 -->
   <script src="https://cdn.jsdelivr.net/npm/lunar-javascript@1.6.12/lunar.min.js"></script>
-  <script src="https://gosspublic.alicdn.com/aliyun-oss-sdk-6.18.0.min.js"></script>
-
-  <!-- 应用脚本 -->
   <script src="js/config.js"></script>
   <script src="js/access-gate.js"></script>
   <script>
-    // 主页守卫：未认证用户跳转到密码页
     window.AccessGate.requireAuth();
   </script>
   <script src="js/lunar.js"></script>
   <script src="js/time-calc.js"></script>
   <script src="js/holiday.js"></script>
-  <script src="js/oss-storage.js"></script>
+  <script src="js/api-client.js"></script>
   <script src="js/store.js"></script>
   <script src="js/card-render.js"></script>
   <script src="js/modal.js"></script>
