@@ -139,6 +139,11 @@
 
   <!-- 应用脚本 -->
   <script src="js/config.js"></script>
+  <script src="js/access-gate.js"></script>
+  <script>
+    // 主页守卫：未认证用户跳转到密码页
+    window.AccessGate.requireAuth();
+  </script>
   <script src="js/lunar-helper.js"></script>
   <script src="js/storage.js"></script>
   <script src="js/countdown.js"></script>

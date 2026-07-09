@@ -3,7 +3,12 @@
  * 此文件包含占位符，将由 Cloudflare Pages 构建时替换
  */
 
-// 访问密码（构建时注入）
+// 应用配置对象（新增统一配置入口）
+window.APP_CONFIG = {
+  password: '__PASSWORD__' // 访问密码（构建时注入）
+};
+
+// 访问密码（构建时注入）- 保持向后兼容
 window.APP_PASSWORD = '__PASSWORD__';
 
 // OSS 配置（构建时注入）
