@@ -1,12 +1,12 @@
 # Subagent Progress Checkpoint
 
-**Current Task:** Task 3 - 时间计算核心（time-calc + lunar）(COMPLETED)
-**OpenSpec Task:** 3.1-3.5 事件类型模型、时间计算、农历换算、走动时间、卡片渲染
+**Current Task:** Task 4 - 节假日数据接入（holiday）(COMPLETED)
+**OpenSpec Task:** 4.1-4.4 节假日数据接入、按 name 分组、法定节假日判定、降级处理
 **Stage:** checkoff
 **Review Mode:** standard (no per-task review)
-**Commits:** 3720dad070b93c2f1283f66087663ae9f46c76ec
-**Changed Files:** js/lunar.js, js/time-calc.js, index.html
-**RED/GREEN Evidence:** N/A (tdd_mode: direct), 36/36 tests passed
+**Commits:** 498f7d5
+**Changed Files:** js/holiday.js
+**RED/GREEN Evidence:** N/A (tdd_mode: direct), API + grouping + isHighwayFree verified
 **Review Round:** 0/1
 **Passed Reviews:** implementer self-test passed
 **Pending Feedback:** none

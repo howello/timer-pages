@@ -22,10 +22,10 @@
 
 ## 4. 节假日数据接入（holiday-data）
 
-- [ ] 4.1 实现 `js/holiday.js`：请求 `api.jiejiariapi.com/v1/holidays/{year}`
-- [ ] 4.2 按 name 分组，取每组最早日期作为节日代表日
-- [ ] 4.3 法定节假日判定（isOffDay）与高速免费标注（仅春节、清明、劳动节、国庆节）
-- [ ] 4.4 API 失败降级处理（提示 + 空数据兜底）
+- [x] 4.1 实现 `js/holiday.js`：请求 `api.jiejiariapi.com/v1/holidays/{year}`
+- [x] 4.2 按 name 分组，取每组最早日期作为节日代表日
+- [x] 4.3 法定节假日判定（isOffDay）与高速免费标注（仅春节、清明、劳动节、国庆节）
+- [x] 4.4 API 失败降级处理（提示 + 空数据兜底）
 
 ## 5. OSS 存储读写（oss-storage）
 
