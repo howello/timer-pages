@@ -214,7 +214,8 @@ async function handleGetData(env) {
       headers: { 'Content-Type': 'application/json' }
     });
   } catch (e) {
-    // 表不存在等异常：降级返回默认空配置
+    // 表不存在/绑定错配等异常：降级返回默认空配置，但记录日志便于排查部署问题
+    console.warn('[data] 读取 D1 失败，降级返回默认配置:', e && e.message ? e.message : e);
     return jsonResponse(DEFAULT_CONFIG, 200);
   }
 }
@@ -238,12 +239,10 @@ async function handleApi(request, env) {
   const pathname = url.pathname;
   const method = request.method;
 
-  // /api/holidays/:year —— 必须在 PUBLIC_API_PATHS 的 startsWith 判断之前单独匹配
-  const holidaysMatch = pathname.match(/^\/api\/holidays\/([^/]+)$/);
-
+  // 公开端点：仅 login/logout/session/config，其余 /api/ 均需会话
   const isPublic = PUBLIC_API_PATHS.some(
     p => pathname === p || pathname.startsWith(p + '/')
-  ) || !!holidaysMatch;
+  );
 
   // 公开端点直接路由
   if (isPublic) {
@@ -251,7 +250,6 @@ async function handleApi(request, env) {
     if (pathname === '/api/logout' && method === 'POST') return handleLogout();
     if (pathname === '/api/session' && method === 'GET') return handleSession(request, env);
     if (pathname === '/api/config' && method === 'GET') return handleConfig();
-    if (holidaysMatch && method === 'GET') return handleHolidays(holidaysMatch[1]);
     return jsonResponse({ error: 'not found' }, 404);
   }
 
@@ -259,6 +257,8 @@ async function handleApi(request, env) {
   const guard = await requireSession(request, env);
   if (guard.response) return guard.response;
 
+  const holidaysMatch = pathname.match(/^\/api\/holidays\/([^/]+)$/);
+  if (holidaysMatch && method === 'GET') return handleHolidays(holidaysMatch[1]);
   if (pathname === '/api/data' && method === 'GET') return handleGetData(env);
   if (pathname === '/api/data' && method === 'PUT') return handlePutData(request, env);
 
