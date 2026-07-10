@@ -1,3 +1,0 @@
-# Comet 项目配置
-build_command: "echo 'Static site - no build step required'"
-verify_command: "echo 'Static site - verification complete'"
