@@ -167,7 +167,7 @@
       var info = document.createElement('div');
       info.className = 'card-info';
 
-      var title = document.createElement('h3');
+      var title = document.createElement('h2');
       title.textContent = card.title || card.name || '未命名';
       info.appendChild(title);
 

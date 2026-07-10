@@ -94,6 +94,19 @@
         showToast('已重新同步');
       });
     }
+
+    var logoutBtn = document.getElementById('logout-btn');
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', function () {
+        if (window.AccessGate && window.AccessGate.logout) {
+          window.AccessGate.logout().finally(function () {
+            window.location.href = '/password.html';
+          });
+        } else {
+          window.location.href = '/password.html';
+        }
+      });
+    }
   }
 
   function bindModalSubmit() {
