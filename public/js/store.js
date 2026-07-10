@@ -48,6 +48,7 @@
 
       // 4. 合并所有卡片
       allCards = [...customEvents, ...holidayCards];
+      normalizeSinglePinned();
 
       isLoaded = true;
       console.log(`数据加载完成: ${customEvents.length} 个自定义事件, ${holidayCards.length} 个节假日`);
@@ -183,20 +184,31 @@
       throw new Error('数据尚未加载，无法切换置顶');
     }
 
+    const current = allCards.find(card => card.id === id);
+    const shouldPin = current ? !current.pinned : true;
+
+    // 全局只允许一个置顶项。
+    customEvents.forEach(event => {
+      event.pinned = false;
+    });
+    Object.keys(holidayMeta).forEach(key => {
+      holidayMeta[key].pinned = false;
+    });
+
     // 判断是自定义事件还是节假日
     if (id.startsWith('festival:')) {
       // 节假日：更新 holidayMeta
       if (!holidayMeta[id]) {
         holidayMeta[id] = { pinned: false, order: 9999 };
       }
-      holidayMeta[id].pinned = !holidayMeta[id].pinned;
+      holidayMeta[id].pinned = shouldPin;
     } else {
       // 自定义事件：更新 customEvents
       const event = customEvents.find(e => e.id === id);
       if (!event) {
         throw new Error(`未找到 ID 为 ${id} 的事件`);
       }
-      event.pinned = !event.pinned;
+      event.pinned = shouldPin;
     }
 
     // 重新合并数据
@@ -275,6 +287,25 @@
 
     // 合并所有卡片
     allCards = [...customEvents, ...holidayCards];
+    normalizeSinglePinned();
+  }
+
+  function normalizeSinglePinned() {
+    let pinnedId = null;
+    allCards.forEach(card => {
+      if (card.pinned && pinnedId === null) {
+        pinnedId = card.id;
+      } else if (card.pinned) {
+        card.pinned = false;
+      }
+    });
+
+    customEvents.forEach(event => {
+      event.pinned = event.id === pinnedId;
+    });
+    Object.keys(holidayMeta).forEach(id => {
+      holidayMeta[id].pinned = id === pinnedId;
+    });
   }
 
   /**

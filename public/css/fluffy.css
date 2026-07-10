@@ -147,9 +147,15 @@ p {
 }
 
 .scroll-reveal {
+  opacity: 0;
+  transform: translateY(-14px);
+  transition: opacity 420ms ease, transform 420ms ease;
+  pointer-events: none;
+}
+
+.scroll-reveal.is-visible {
   opacity: 1;
   transform: translateY(0);
-  transition: opacity 420ms ease, transform 420ms ease;
   pointer-events: auto;
 }
 
@@ -278,15 +284,23 @@ p {
 }
 
 .dial-face strong {
-  font-size: 4rem;
+  font-size: 4.6rem;
   line-height: 1;
   font-variant-numeric: tabular-nums;
 }
 
+.dial-face span:last-child {
+  max-width: 150px;
+  text-align: center;
+  line-height: 1.35;
+}
+
 .fixed-card-stage {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: 16px;
+  width: min(640px, 100%);
+  margin: 0 auto;
   padding: 8px 0 40px;
 }
 
@@ -329,6 +343,60 @@ p {
   margin: 0 0 12px;
   font-size: 2.5rem;
   line-height: 1.04;
+}
+
+.tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 10px;
+}
+
+.tag {
+  display: inline-flex;
+  min-height: 26px;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid rgba(121, 103, 72, 0.14);
+  border-radius: var(--radius);
+  color: #485146;
+  background: rgba(255, 255, 255, 0.48);
+  box-shadow: inset 2px 2px 6px rgba(127, 106, 72, 0.08), inset -3px -3px 7px rgba(255, 255, 255, 0.72);
+  padding: 4px 8px;
+  font-size: 0.75rem;
+  font-weight: 800;
+}
+
+.tag::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.65;
+}
+
+.tag-festival,
+.tag-statutory {
+  color: #b9524d;
+  background: rgba(232, 118, 112, 0.12);
+}
+
+.tag-countdown,
+.tag-freeway {
+  color: #3f7e68;
+  background: rgba(120, 181, 156, 0.14);
+}
+
+.tag-recurring,
+.tag-calendar {
+  color: #527b99;
+  background: rgba(134, 184, 215, 0.14);
+}
+
+.tag-elapsed {
+  color: #82679a;
+  background: rgba(168, 146, 187, 0.14);
 }
 
 .feature-card p {
@@ -421,11 +489,17 @@ p {
 
 .sortable-list {
   display: grid;
-  gap: 10px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
 }
 
 .list-card {
-  min-height: 92px;
+  min-width: 0;
+  min-height: 230px;
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr);
+  align-content: start;
+  align-items: start;
   transition: transform 180ms ease, opacity 180ms ease, border-color 180ms ease;
 }
 
@@ -441,8 +515,28 @@ p {
 }
 
 .list-card .running-time {
-  margin-top: 8px;
-  font-size: 1.1rem;
+  margin-top: 18px;
+  font-size: 1.35rem;
+}
+
+.list-card .card-info {
+  grid-column: 1 / -1;
+  width: 100%;
+}
+
+.list-card .drag-handle {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.card-actions {
+  grid-column: 2;
+  grid-row: 1;
+  justify-self: end;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
 }
 
 .list-card.pinned {
@@ -508,6 +602,35 @@ p {
 
 .pin-button.active {
   background: rgba(239, 200, 91, 0.36);
+}
+
+.category-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.category-tab {
+  min-height: 34px;
+  border: 1px solid rgba(255, 255, 255, 0.68);
+  border-radius: var(--radius);
+  color: #5d665d;
+  background: rgba(255, 255, 255, 0.44);
+  box-shadow: var(--inner);
+  padding: 0 12px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  transition: transform 180ms ease, background 180ms ease, color 180ms ease;
+}
+
+.category-tab:hover {
+  transform: translateY(-1px);
+}
+
+.category-tab.active {
+  color: #2e2519;
+  background: linear-gradient(135deg, rgba(232, 118, 112, 0.24), rgba(239, 200, 91, 0.24), rgba(120, 181, 156, 0.22));
 }
 
 .logout-button {
@@ -807,7 +930,7 @@ textarea:focus {
     min-height: 300px;
   }
 
-  .fixed-card-stage {
+  .sortable-list {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
@@ -838,6 +961,7 @@ textarea:focus {
   }
 
   .fixed-card-stage,
+  .sortable-list,
   .modal-grid {
     grid-template-columns: 1fr;
   }
@@ -852,19 +976,31 @@ textarea:focus {
 
   .floating-header,
   .list-toolbar,
-  .list-card,
   .modal-head {
     align-items: flex-start;
   }
 
   .floating-header,
-  .list-toolbar,
-  .list-card {
+  .list-toolbar {
     flex-direction: column;
+  }
+
+  .list-card {
+    min-height: 206px;
   }
 
   .header-actions {
     width: 100%;
+  }
+
+  .category-tabs {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .category-tab {
+    flex: 1 1 calc(50% - 8px);
+    padding: 0 8px;
   }
 
   .logout-button .logout-label {

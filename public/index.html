@@ -42,12 +42,12 @@
         </div>
       </div>
 
-      <div class="time-instrument glass-fluff" aria-hidden="true">
+      <div class="time-instrument glass-fluff" id="spotlight-card" aria-live="polite">
         <div class="dial-lines"></div>
         <div class="dial-face">
-          <span>SPRING</span>
-          <strong>365</strong>
-          <span>DAYS</span>
+          <span id="spotlight-type">PINNED</span>
+          <strong id="spotlight-days">--</strong>
+          <span id="spotlight-title">等待置顶</span>
         </div>
       </div>
     </section>
@@ -60,7 +60,13 @@
           <p class="eyebrow">EVENT LIST</p>
           <h2>时间清单</h2>
         </div>
-        <span class="soft-status">拖动排序 · 置顶优先</span>
+        <div class="category-tabs" id="category-tabs" aria-label="事件分类">
+          <button type="button" class="category-tab active" data-filter="all">全部</button>
+          <button type="button" class="category-tab" data-filter="festival">节日</button>
+          <button type="button" class="category-tab" data-filter="countdown">倒计时</button>
+          <button type="button" class="category-tab" data-filter="recurring">周期性</button>
+          <button type="button" class="category-tab" data-filter="elapsed">已过天数</button>
+        </div>
       </div>
       <div class="sortable-list" id="event-list"></div>
     </section>

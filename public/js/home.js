@@ -8,6 +8,7 @@
   var cards = [];
   var draggedId = null;
   var reduceMotion = false;
+  var activeFilter = 'all';
 
   function init() {
     reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -15,6 +16,7 @@
     function startApp() {
       bindScrollReveal();
       bindHeaderActions();
+      bindCategoryFilters();
       bindModalSubmit();
       updateCurrentTime();
       setInterval(updateCurrentTime, 1000);
@@ -50,7 +52,7 @@
 
   function renderAll() {
     window.CardRender.renderFixed(cards);
-    window.CardRender.renderList(cards, {
+    window.CardRender.renderList(getVisibleCards(), {
       onPin: handlePin,
       onEdit: handleEdit,
       onDelete: handleDelete
@@ -59,24 +61,41 @@
     window.CardRender.startLiveTimer(function () { return cards; });
   }
 
+  function getVisibleCards() {
+    if (activeFilter === 'all') return cards;
+    return cards.filter(function (card) {
+      return card.type === activeFilter;
+    });
+  }
+
   function bindScrollReveal() {
     var header = document.getElementById('floating-header');
     var revealed = document.getElementById('revealed-list');
 
-    if (reduceMotion) {
-      if (header) header.classList.add('is-visible');
-      if (revealed) revealed.classList.add('is-visible');
-      return;
-    }
-
     function update() {
-      var show = window.scrollY > 80;
-      if (header) header.classList.toggle('is-visible', show);
-      if (revealed) revealed.classList.toggle('is-visible', show);
+      var showHeader = window.scrollY > 80;
+      var showList = window.scrollY > 260;
+      if (header) header.classList.toggle('is-visible', showHeader);
+      if (revealed) revealed.classList.toggle('is-visible', showList);
     }
 
     window.addEventListener('scroll', update, { passive: true });
     update();
+  }
+
+  function bindCategoryFilters() {
+    var tabs = document.getElementById('category-tabs');
+    if (!tabs) return;
+
+    tabs.querySelectorAll('.category-tab').forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        activeFilter = tab.getAttribute('data-filter') || 'all';
+        tabs.querySelectorAll('.category-tab').forEach(function (item) {
+          item.classList.toggle('active', item === tab);
+        });
+        renderAll();
+      });
+    });
   }
 
   function bindHeaderActions() {
@@ -190,7 +209,10 @@
         var dragging = list.querySelector('.is-dragging');
         if (!dragging || dragging === cardEl) return;
         var rect = cardEl.getBoundingClientRect();
-        var before = e.clientY < rect.top + rect.height / 2;
+        var midpointY = rect.top + rect.height / 2;
+        var midpointX = rect.left + rect.width / 2;
+        var sameRow = Math.abs(e.clientY - midpointY) < rect.height / 2;
+        var before = sameRow ? e.clientX < midpointX : e.clientY < midpointY;
         if (before) {
           list.insertBefore(dragging, cardEl);
         } else {
@@ -201,9 +223,13 @@
 
     list.addEventListener('drop', async function (e) {
       e.preventDefault();
-      var ids = Array.from(list.querySelectorAll('.list-card')).map(function (el) {
+      var visibleIds = Array.from(list.querySelectorAll('.list-card')).map(function (el) {
         return el.getAttribute('data-id');
       });
+      var hiddenIds = cards
+        .map(function (card) { return card.id; })
+        .filter(function (id) { return visibleIds.indexOf(id) === -1; });
+      var ids = visibleIds.concat(hiddenIds);
       try {
         await window.EventStore.reorder(ids);
         cards = window.EventStore.getSortedCards();
@@ -227,7 +253,10 @@
         if (overCard && overCard !== cardEl) {
           e.preventDefault();
           var rect = overCard.getBoundingClientRect();
-          var before = e.touches[0].clientY < rect.top + rect.height / 2;
+          var midpointY = rect.top + rect.height / 2;
+          var midpointX = rect.left + rect.width / 2;
+          var sameRow = Math.abs(e.touches[0].clientY - midpointY) < rect.height / 2;
+          var before = sameRow ? e.touches[0].clientX < midpointX : e.touches[0].clientY < midpointY;
           if (before) {
             list.insertBefore(cardEl, overCard);
           } else {

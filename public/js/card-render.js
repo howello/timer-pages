@@ -29,10 +29,57 @@
   function formatTime(t) {
     if (!t) return '--';
     var prefix = t.isPast ? '已过去' : '还有';
-    return prefix + ' ' + t.days + ' 天 ' +
-      String(t.hours).padStart(2, '0') + ':' +
-      String(t.minutes).padStart(2, '0') + ':' +
-      String(t.seconds).padStart(2, '0');
+    return prefix + ' ' + t.days + ' 天';
+  }
+
+  function buildTags(card) {
+    var tags = [];
+    tags.push({ label: TYPE_LABELS[card.type] || card.type || '事件', tone: card.type || 'default' });
+    tags.push({ label: card.calendar === 'lunar' ? '农历' : '公历', tone: 'calendar' });
+    if (card.isOffDay) tags.push({ label: '法定节假日', tone: 'statutory' });
+    if (card.highwayFree) tags.push({ label: '高速免费', tone: 'freeway' });
+    return tags;
+  }
+
+  function appendTags(parent, card) {
+    var tagWrap = document.createElement('div');
+    tagWrap.className = 'tag-row';
+    buildTags(card).forEach(function (tag) {
+      var el = document.createElement('span');
+      el.className = 'tag tag-' + tag.tone;
+      el.textContent = tag.label;
+      tagWrap.appendChild(el);
+    });
+    parent.appendChild(tagWrap);
+  }
+
+  function getPinnedCard(cards) {
+    var pinned = cards.filter(function (card) { return card.pinned === true; });
+    return pinned[0] || cards[0] || null;
+  }
+
+  function renderSpotlight(card) {
+    var typeEl = document.getElementById('spotlight-type');
+    var daysEl = document.getElementById('spotlight-days');
+    var titleEl = document.getElementById('spotlight-title');
+    if (!typeEl || !daysEl || !titleEl) return;
+
+    if (!card) {
+      typeEl.textContent = 'PINNED';
+      daysEl.textContent = '--';
+      titleEl.textContent = '等待置顶';
+      return;
+    }
+
+    typeEl.textContent = TYPE_LABELS[card.type] || '事件';
+    titleEl.textContent = card.title || card.name || '未命名';
+    try {
+      var target = window.TimeCalc.resolveTargetDate(card);
+      var t = window.TimeCalc.diff(new Date(), target);
+      daysEl.textContent = String(t.days);
+    } catch (e) {
+      daysEl.textContent = '--';
+    }
   }
 
   /**
@@ -43,7 +90,6 @@
    */
   function createCard(card, opts) {
     opts = opts || {};
-    var isFixed = opts.isFixed || false;
     var isFestival = card.id && card.id.startsWith('festival:');
 
     var article = document.createElement('article');
@@ -68,23 +114,7 @@
     title.textContent = card.title || card.name || '未命名';
     info.appendChild(title);
 
-    // 标签：类型 + 日期体系 + 法定节假日 + 高速免费
-    var meta = document.createElement('p');
-    var tags = [];
-    tags.push(TYPE_LABELS[card.type] || card.type);
-    if (card.calendar === 'lunar') {
-      tags.push('农历');
-    } else {
-      tags.push('公历');
-    }
-    if (card.isOffDay) {
-      tags.push('法定节假日');
-    }
-    if (card.highwayFree) {
-      tags.push('高速免费');
-    }
-    meta.textContent = tags.join(' · ');
-    info.appendChild(meta);
+    appendTags(info, card);
 
     // 走动时间显示
     var timeDiv = document.createElement('div');
@@ -102,6 +132,9 @@
 
     article.appendChild(info);
 
+    var actions = document.createElement('div');
+    actions.className = 'card-actions';
+
     // 置顶按钮
     var pinBtn = document.createElement('button');
     pinBtn.className = 'pin-button' + (card.pinned ? ' active' : '');
@@ -111,7 +144,7 @@
     pinBtn.addEventListener('click', function () {
       if (opts.onPin) opts.onPin(card.id);
     });
-    article.appendChild(pinBtn);
+    actions.appendChild(pinBtn);
 
     // 编辑按钮（仅自定义事件）
     if (!isFestival && opts.onEdit) {
@@ -123,7 +156,7 @@
       editBtn.addEventListener('click', function () {
         opts.onEdit(card);
       });
-      article.appendChild(editBtn);
+      actions.appendChild(editBtn);
     }
 
     // 删除按钮（仅自定义事件）
@@ -137,8 +170,10 @@
       delBtn.addEventListener('click', function () {
         opts.onDelete(card.id);
       });
-      article.appendChild(delBtn);
+      actions.appendChild(delBtn);
     }
+
+    article.appendChild(actions);
 
     return article;
   }
@@ -152,11 +187,10 @@
     if (!container) return;
     container.innerHTML = '';
 
-    var fixedCards = cards.filter(function (c) { return c.pinned === true; });
-    if (fixedCards.length === 0) {
-      // 没有 pinned，取前 2 张
-      fixedCards = cards.slice(0, 2);
-    }
+    var spotlight = getPinnedCard(cards);
+    renderSpotlight(spotlight);
+
+    var fixedCards = spotlight ? [spotlight] : [];
 
     fixedCards.forEach(function (card) {
       // 固定卡片使用简化版 DOM，不包含拖拽/编辑/删除按钮
@@ -171,23 +205,7 @@
       title.textContent = card.title || card.name || '未命名';
       info.appendChild(title);
 
-      // 标签：类型 + 日期体系 + 法定节假日 + 高速免费
-      var meta = document.createElement('p');
-      var tags = [];
-      tags.push(TYPE_LABELS[card.type] || card.type);
-      if (card.calendar === 'lunar') {
-        tags.push('农历');
-      } else {
-        tags.push('公历');
-      }
-      if (card.isOffDay) {
-        tags.push('法定节假日');
-      }
-      if (card.highwayFree) {
-        tags.push('高速免费');
-      }
-      meta.textContent = tags.join(' · ');
-      info.appendChild(meta);
+      appendTags(info, card);
 
       // 走动时间显示
       var timeDiv = document.createElement('div');
@@ -231,6 +249,7 @@
    */
   function refreshRunningTimes(cards) {
     var now = new Date();
+    renderSpotlight(getPinnedCard(cards));
     cards.forEach(function (card) {
       var target;
       try {
@@ -273,6 +292,7 @@
     createCard: createCard,
     renderFixed: renderFixed,
     renderList: renderList,
+    renderSpotlight: renderSpotlight,
     refreshRunningTimes: refreshRunningTimes,
     startLiveTimer: startLiveTimer,
     stopLiveTimer: stopLiveTimer
