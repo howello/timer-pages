@@ -17,6 +17,6 @@ verification_report: docs/superpowers/reports/2026-07-09-refine-countdown-site-v
 branch_status: handled
 created_at: 2026-07-09
 verified_at: 2026-07-09
-archived: false
+archived: true
 handoff_context: openspec/changes/refine-countdown-site/.comet/handoff/design-context.json
 handoff_hash: 598acf1948be68356310c24370dff25edf7354baa6e1f2adecf77bfc72947957

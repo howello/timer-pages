@@ -2,6 +2,8 @@
 comet_change: refine-countdown-site
 role: technical-design
 canonical_spec: openspec
+archived-with: 2026-07-10-refine-countdown-site
+status: final
 ---
 
 # 倒计时站点重构 — 技术设计文档
