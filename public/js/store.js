@@ -8,7 +8,7 @@
 
   // 内部状态
   let allCards = []; // 合并后的所有卡片
-  let customEvents = []; // 自定义事件（来自 OSS）
+  let customEvents = []; // 自定义事件（来自后端 D1）
   let holidayMeta = {}; // 节假日元数据（pinned/order）
   let isLoaded = false; // 是否已加载
 
@@ -18,7 +18,7 @@
    */
   async function load() {
     try {
-      // 1. 从 OSS 读取自定义事件和节假日元数据
+      // 1. 从后端 D1 读取自定义事件和节假日元数据
       const config = await window.APIClient.read();
       customEvents = config.events || [];
       holidayMeta = config.holidayMeta || {};
@@ -104,8 +104,8 @@
     // 重新合并数据
     await reloadCards();
 
-    // 写回 OSS
-    await persistToOSS();
+    // 写回后端 D1
+    await persistToDB();
 
     console.log(`事件添加成功: ${event.name}`);
   }
@@ -135,8 +135,8 @@
     // 重新合并数据
     await reloadCards();
 
-    // 写回 OSS
-    await persistToOSS();
+    // 写回后端 D1
+    await persistToDB();
 
     console.log(`事件更新成功: ${event.name}`);
   }
@@ -167,8 +167,8 @@
     // 重新合并数据
     await reloadCards();
 
-    // 写回 OSS
-    await persistToOSS();
+    // 写回后端 D1
+    await persistToDB();
 
     console.log(`事件删除成功: ${eventName}`);
   }
@@ -202,8 +202,8 @@
     // 重新合并数据
     await reloadCards();
 
-    // 写回 OSS
-    await persistToOSS();
+    // 写回后端 D1
+    await persistToDB();
 
     console.log(`事件置顶状态切换成功: ${id}`);
   }
@@ -239,8 +239,8 @@
     // 重新合并数据
     await reloadCards();
 
-    // 写回 OSS
-    await persistToOSS();
+    // 写回后端 D1
+    await persistToDB();
 
     console.log(`批量重排序成功: ${ids.length} 个事件`);
   }
@@ -278,10 +278,10 @@
   }
 
   /**
-   * 持久化到 OSS（内部辅助函数）
+   * 持久化到后端 D1（内部辅助函数）
    * @returns {Promise<void>}
    */
-  async function persistToOSS() {
+  async function persistToDB() {
     const config = {
       version: 1,
       events: customEvents,

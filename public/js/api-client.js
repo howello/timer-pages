@@ -1,7 +1,6 @@
 /**
  * API 客户端模块
- * 通过 Cloudflare Pages Functions 代理 OSS 数据读写
- * 替代旧的 aliyun-oss-sdk 直接调用方式
+ * 通过 Cloudflare Workers 端点读写 D1 存储的事件配置
  */
 
 (function(window) {
