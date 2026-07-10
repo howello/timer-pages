@@ -7,12 +7,9 @@
 
   var cards = [];
   var draggedId = null;
-  var reduceMotion = false;
   var activeFilter = 'all';
 
   function init() {
-    reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
     function startApp() {
       bindScrollReveal();
       bindHeaderActions();
