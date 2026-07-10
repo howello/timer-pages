@@ -20,9 +20,3 @@
 #### Scenario: 未配置密码（无开发模式绕过）
 - **WHEN** Cloudflare Pages 环境变量 PASSWORD 不存在或为空字符串
 - **THEN** 系统返回 500 "配置错误"，不放行任意输入
-
-## REMOVED Requirements
-
-### Requirement: 构建期占位符密码注入
-**Reason**: 改为 Pages Functions 运行时从环境变量读取，前端不再持有任何密码
-**Migration**: 删除构建期 sed 替换逻辑，删除 `js/config.js` 中的 `password` 字段

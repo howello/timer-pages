@@ -20,9 +20,3 @@
 #### Scenario: 安全风险提示
 - **WHEN** 读者阅读安全相关章节
 - **THEN** 手册说明密钥仅存在于 Cloudflare Pages Functions 环境变量中，不会出现在前端静态 JS 中
-
-## REMOVED Requirements
-
-### Requirement: 构建期 sed 占位符替换
-**Reason**: 改为 Pages Functions 运行时从环境变量读取，不再需要构建期替换
-**Migration**: 删除 `build.sh` 和所有 `__PASSWORD__`/`__OSS_*__` 占位符相关说明

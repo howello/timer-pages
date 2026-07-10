@@ -38,9 +38,3 @@
 #### Scenario: 检查静态资源
 - **WHEN** 浏览器下载任何 `.js` 文件
 - **THEN** 文件中不应包含 `__OSS_AK__`、`__OSS_SK__`、`__OSS_REGION__` 等占位符或真实密钥
-
-## REMOVED Requirements
-
-### Requirement: OSS 凭证最小权限（前端暴露）
-**Reason**: 已迁移到后端，前端不再持有密钥，但 RAM 子账号最小权限原则继续保留在部署手册
-**Migration**: RAM 子账号权限策略保持不变，仅使用位置从前端 SDK 改为后端 Functions
