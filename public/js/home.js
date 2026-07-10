@@ -59,8 +59,11 @@
   }
 
   function getVisibleCards() {
-    if (activeFilter === 'all') return cards;
-    return cards.filter(function (card) {
+    var visibleCards = window.CardRender && window.CardRender.getRenderableCards
+      ? window.CardRender.getRenderableCards(cards)
+      : cards;
+    if (activeFilter === 'all') return visibleCards;
+    return visibleCards.filter(function (card) {
       return card.type === activeFilter;
     });
   }
@@ -268,7 +271,16 @@
     var el = document.getElementById('current-time');
     if (!el) return;
     var now = new Date();
-    el.textContent = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+    if (window.TimeCalc && window.TimeCalc.formatClockWithLunar) {
+      el.textContent = window.TimeCalc.formatClockWithLunar(now);
+      return;
+    }
+    el.textContent = now.getFullYear() + '-' +
+      String(now.getMonth() + 1).padStart(2, '0') + '-' +
+      String(now.getDate()).padStart(2, '0') + ' ' +
+      String(now.getHours()).padStart(2, '0') + ':' +
+      String(now.getMinutes()).padStart(2, '0') + ':' +
+      String(now.getSeconds()).padStart(2, '0');
   }
 
   function showToast(message) {

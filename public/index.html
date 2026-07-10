@@ -35,10 +35,6 @@
             <span>现在</span>
             <strong id="current-time">--:--</strong>
           </span>
-          <span class="metric-pill">
-            <span>视图</span>
-            <strong>置顶优先</strong>
-          </span>
         </div>
       </div>
 
@@ -46,8 +42,14 @@
         <div class="dial-lines"></div>
         <div class="dial-face">
           <span id="spotlight-type">PINNED</span>
-          <strong id="spotlight-days">--</strong>
-          <span id="spotlight-title">等待置顶</span>
+          <div class="spotlight-count">
+            <strong id="spotlight-days">--</strong>
+            <span id="spotlight-unit">天</span>
+          </div>
+          <h2 id="spotlight-title">等待置顶</h2>
+          <p id="spotlight-date">置顶一个事件后会显示完整信息</p>
+          <div class="tag-row spotlight-tags" id="spotlight-tags"></div>
+          <p id="spotlight-note" class="spotlight-note"></p>
         </div>
       </div>
     </section>

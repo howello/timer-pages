@@ -147,6 +147,64 @@ function diff(now, target) {
   };
 }
 
+function pad2(value) {
+  return String(value).padStart(2, '0');
+}
+
+function formatDateTime(date) {
+  return date.getFullYear() + '-' +
+    pad2(date.getMonth() + 1) + '-' +
+    pad2(date.getDate()) + ' ' +
+    pad2(date.getHours()) + ':' +
+    pad2(date.getMinutes()) + ':' +
+    pad2(date.getSeconds());
+}
+
+function formatDateOnly(date) {
+  return date.getFullYear() + '-' + pad2(date.getMonth() + 1) + '-' + pad2(date.getDate());
+}
+
+function formatLunarLabel(date) {
+  const lunarLib = window.Lunar || (typeof Lunar !== 'undefined' ? Lunar : null);
+  if (!lunarLib || !lunarLib.Solar || !lunarLib.Solar.fromDate) {
+    return '';
+  }
+
+  try {
+    const lunar = lunarLib.Solar.fromDate(date).getLunar();
+    if (!lunar || !lunar.getMonthInChinese || !lunar.getDayInChinese) return '';
+    return '农历' + lunar.getMonthInChinese() + lunar.getDayInChinese();
+  } catch (error) {
+    console.warn('农历日期格式化失败:', error);
+    return '';
+  }
+}
+
+function formatClockWithLunar(date) {
+  const base = formatDateTime(date);
+  const lunarText = formatLunarLabel(date);
+  return lunarText ? base + ' ' + lunarText : base;
+}
+
+function shouldShowDayCount(event) {
+  return !(event && event.calendar === DateSystem.LUNAR && event.type !== EventType.FESTIVAL);
+}
+
+function shouldHideCard(event, now = new Date()) {
+  if (!event || event.type !== EventType.FESTIVAL) return false;
+
+  let target;
+  try {
+    target = resolveTargetDate(event);
+  } catch (error) {
+    return false;
+  }
+
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const targetDay = new Date(target.getFullYear(), target.getMonth(), target.getDate());
+  return targetDay < today;
+}
+
 /**
  * 解析事件公历日期，并合并 event.time
  * @param {Object} event
@@ -172,6 +230,19 @@ function parseDate(dateInput) {
   }
 
   if (typeof dateInput === 'string') {
+    const dateOnlyMatch = dateInput.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (dateOnlyMatch) {
+      return new Date(
+        parseInt(dateOnlyMatch[1], 10),
+        parseInt(dateOnlyMatch[2], 10) - 1,
+        parseInt(dateOnlyMatch[3], 10),
+        0,
+        0,
+        0,
+        0
+      );
+    }
+
     const parsed = new Date(dateInput);
     if (isNaN(parsed.getTime())) {
       throw new Error(`无效的日期字符串: ${dateInput}`);
@@ -290,6 +361,11 @@ window.TimeCalc = {
   resolveTargetDate,
   diff,
   parseDate,
+  formatDateOnly,
+  formatDateTime,
+  formatClockWithLunar,
+  shouldHideCard,
+  shouldShowDayCount,
   getNextAnniversary,
   formatTimeDiff,
   isLeapYear,

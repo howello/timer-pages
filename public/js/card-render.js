@@ -19,6 +19,8 @@
     elapsed: 'rose'
   };
 
+  var CARD_THEMES = ['theme-sunrise', 'theme-mint', 'theme-sky', 'theme-plum', 'theme-citrus'];
+
   var timerId = null;
 
   /**
@@ -26,10 +28,32 @@
    * @param {Object} t - {days, hours, minutes, seconds, isPast}
    * @returns {string}
    */
-  function formatTime(t) {
+  function formatTime(card, t) {
     if (!t) return '--';
+    if (window.TimeCalc && window.TimeCalc.shouldShowDayCount && !window.TimeCalc.shouldShowDayCount(card)) {
+      return '';
+    }
     var prefix = t.isPast ? '已过去' : '还有';
     return prefix + ' ' + t.days + ' 天';
+  }
+
+  function getCardTheme(card) {
+    var source = String((card && card.id) || (card && card.title) || (card && card.name) || '');
+    var total = 0;
+    for (var i = 0; i < source.length; i++) {
+      total += source.charCodeAt(i);
+    }
+    return CARD_THEMES[total % CARD_THEMES.length];
+  }
+
+  function isHiddenCard(card) {
+    return window.TimeCalc && window.TimeCalc.shouldHideCard && window.TimeCalc.shouldHideCard(card);
+  }
+
+  function getRenderableCards(cards) {
+    return (cards || []).filter(function (card) {
+      return !isHiddenCard(card);
+    });
   }
 
   function buildTags(card) {
@@ -54,31 +78,89 @@
   }
 
   function getPinnedCard(cards) {
-    var pinned = cards.filter(function (card) { return card.pinned === true; });
-    return pinned[0] || cards[0] || null;
+    var visibleCards = getRenderableCards(cards);
+    var pinned = visibleCards.filter(function (card) { return card.pinned === true; });
+    return pinned[0] || visibleCards[0] || null;
+  }
+
+  function describeCardDate(card, target) {
+    if (!card) return '';
+
+    if (card.calendar === 'lunar') {
+      var parts = [];
+      if (card.lunarYear) parts.push(card.lunarYear + '年');
+      if (card.lunarMonth) parts.push((card.isLeapMonth ? '闰' : '') + card.lunarMonth + '月');
+      if (card.lunarDay) parts.push(card.lunarDay + '日');
+      var lunarText = parts.length ? '农历 ' + parts.join('') : '农历日期';
+      if (target && window.TimeCalc && window.TimeCalc.formatDateOnly) {
+        lunarText += ' · 对应 ' + window.TimeCalc.formatDateOnly(target);
+      }
+      return lunarText;
+    }
+
+    if (target && window.TimeCalc && window.TimeCalc.formatDateOnly) {
+      return '目标 ' + window.TimeCalc.formatDateOnly(target);
+    }
+
+    return card.date ? '目标 ' + card.date : '';
   }
 
   function renderSpotlight(card) {
     var typeEl = document.getElementById('spotlight-type');
     var daysEl = document.getElementById('spotlight-days');
+    var unitEl = document.getElementById('spotlight-unit');
     var titleEl = document.getElementById('spotlight-title');
+    var dateEl = document.getElementById('spotlight-date');
+    var noteEl = document.getElementById('spotlight-note');
+    var tagsEl = document.getElementById('spotlight-tags');
     if (!typeEl || !daysEl || !titleEl) return;
 
     if (!card) {
       typeEl.textContent = 'PINNED';
       daysEl.textContent = '--';
+      daysEl.classList.remove('text-mode');
+      if (unitEl) unitEl.textContent = '天';
       titleEl.textContent = '等待置顶';
+      if (dateEl) dateEl.textContent = '置顶一个事件后会显示完整信息';
+      if (noteEl) noteEl.textContent = '';
+      if (tagsEl) tagsEl.innerHTML = '';
       return;
     }
 
     typeEl.textContent = TYPE_LABELS[card.type] || '事件';
     titleEl.textContent = card.title || card.name || '未命名';
+    var target = null;
     try {
-      var target = window.TimeCalc.resolveTargetDate(card);
+      target = window.TimeCalc.resolveTargetDate(card);
       var t = window.TimeCalc.diff(new Date(), target);
-      daysEl.textContent = String(t.days);
+      if (window.TimeCalc.shouldShowDayCount && !window.TimeCalc.shouldShowDayCount(card)) {
+        daysEl.textContent = '农历';
+        daysEl.classList.add('text-mode');
+        if (unitEl) unitEl.textContent = '';
+      } else {
+        daysEl.textContent = String(t.days);
+        daysEl.classList.remove('text-mode');
+        if (unitEl) unitEl.textContent = t.isPast ? '天前' : '天';
+      }
     } catch (e) {
       daysEl.textContent = '--';
+      daysEl.classList.remove('text-mode');
+      if (unitEl) unitEl.textContent = '天';
+    }
+
+    if (dateEl) dateEl.textContent = describeCardDate(card, target);
+    if (noteEl) {
+      noteEl.textContent = card.note || (card.isOffDay ? '法定节假日' : '');
+      noteEl.style.display = noteEl.textContent ? '' : 'none';
+    }
+    if (tagsEl) {
+      tagsEl.innerHTML = '';
+      buildTags(card).forEach(function (tag) {
+        var el = document.createElement('span');
+        el.className = 'tag tag-' + tag.tone;
+        el.textContent = tag.label;
+        tagsEl.appendChild(el);
+      });
     }
   }
 
@@ -93,7 +175,7 @@
     var isFestival = card.id && card.id.startsWith('festival:');
 
     var article = document.createElement('article');
-    article.className = 'list-card glass-fluff' + (card.pinned ? ' pinned' : '');
+    article.className = 'list-card glass-fluff ' + getCardTheme(card) + (card.pinned ? ' pinned' : '');
     article.setAttribute('data-id', card.id);
     article.setAttribute('draggable', 'true');
 
@@ -119,7 +201,12 @@
     // 走动时间显示
     var timeDiv = document.createElement('div');
     timeDiv.className = 'running-time';
-    timeDiv.textContent = '-- 天 --:--:--';
+    if (window.TimeCalc && window.TimeCalc.shouldShowDayCount && !window.TimeCalc.shouldShowDayCount(card)) {
+      timeDiv.classList.add('is-hidden');
+      timeDiv.textContent = '';
+    } else {
+      timeDiv.textContent = '-- 天 --:--:--';
+    }
     info.appendChild(timeDiv);
 
     // 备注
@@ -183,19 +270,19 @@
    * @param {Array} cards - 全部卡片（已排序）
    */
   function renderFixed(cards) {
+    var spotlight = getPinnedCard(cards);
+    renderSpotlight(spotlight);
+
     var container = document.querySelector('.fixed-card-stage');
     if (!container) return;
     container.innerHTML = '';
-
-    var spotlight = getPinnedCard(cards);
-    renderSpotlight(spotlight);
 
     var fixedCards = spotlight ? [spotlight] : [];
 
     fixedCards.forEach(function (card) {
       // 固定卡片使用简化版 DOM，不包含拖拽/编辑/删除按钮
       var article = document.createElement('article');
-      article.className = 'feature-card glass-fluff ' + (COLOR_MAP[card.type] || 'mint');
+      article.className = 'feature-card glass-fluff ' + (COLOR_MAP[card.type] || 'mint') + ' ' + getCardTheme(card);
       article.setAttribute('data-id', card.id);
 
       var info = document.createElement('div');
@@ -210,7 +297,12 @@
       // 走动时间显示
       var timeDiv = document.createElement('div');
       timeDiv.className = 'running-time';
-      timeDiv.textContent = '-- 天 --:--:--';
+      if (window.TimeCalc && window.TimeCalc.shouldShowDayCount && !window.TimeCalc.shouldShowDayCount(card)) {
+        timeDiv.classList.add('is-hidden');
+        timeDiv.textContent = '';
+      } else {
+        timeDiv.textContent = '-- 天 --:--:--';
+      }
       info.appendChild(timeDiv);
 
       // 备注
@@ -237,7 +329,7 @@
     if (!container) return;
     container.innerHTML = '';
 
-    cards.forEach(function (card) {
+    getRenderableCards(cards).forEach(function (card) {
       var article = createCard(card, opts);
       container.appendChild(article);
     });
@@ -250,7 +342,7 @@
   function refreshRunningTimes(cards) {
     var now = new Date();
     renderSpotlight(getPinnedCard(cards));
-    cards.forEach(function (card) {
+    getRenderableCards(cards).forEach(function (card) {
       var target;
       try {
         target = window.TimeCalc.resolveTargetDate(card);
@@ -258,12 +350,13 @@
         return;
       }
       var t = window.TimeCalc.diff(now, target);
-      var display = formatTime(t);
+      var display = formatTime(card, t);
 
       // 更新所有该卡片的 running-time 元素
       var els = document.querySelectorAll('[data-id="' + card.id + '"] .running-time');
       els.forEach(function (el) {
         el.textContent = display;
+        el.classList.toggle('is-hidden', display === '');
       });
     });
   }
@@ -293,6 +386,7 @@
     renderFixed: renderFixed,
     renderList: renderList,
     renderSpotlight: renderSpotlight,
+    getRenderableCards: getRenderableCards,
     refreshRunningTimes: refreshRunningTimes,
     startLiveTimer: startLiveTimer,
     stopLiveTimer: stopLiveTimer
