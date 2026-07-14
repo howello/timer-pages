@@ -188,6 +188,22 @@ function formatClockWithLunar(date) {
   return lunarText ? base + ' ' + lunarText : base;
 }
 
+const WEEKDAY_LABELS = ['日', '一', '二', '三', '四', '五', '六'];
+
+/**
+ * 拆分当前时刻为分层展示片段
+ * @param {Date} date
+ * @returns {{date: string, weekday: string, time: string, lunar: string}}
+ */
+function formatClockParts(date) {
+  return {
+    date: formatDateOnly(date),
+    weekday: '星期' + WEEKDAY_LABELS[date.getDay()],
+    time: pad2(date.getHours()) + ':' + pad2(date.getMinutes()) + ':' + pad2(date.getSeconds()),
+    lunar: formatLunarLabel(date)
+  };
+}
+
 function shouldShowDayCount(event) {
   // 农历事件同样会被换算为具体公历日期，天数可以正常计算，一律显示
   return true;
@@ -367,6 +383,7 @@ window.TimeCalc = {
   formatDateOnly,
   formatDateTime,
   formatClockWithLunar,
+  formatClockParts,
   shouldHideCard,
   shouldShowDayCount,
   getNextAnniversary,

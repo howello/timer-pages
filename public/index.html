@@ -31,10 +31,14 @@
         <h1 id="hero-title">把重要的日子，摆在光里。</h1>
         <p class="hero-lede">用一块柔软的时间面板，安放节日、纪念日和每一个正在靠近的计划。</p>
         <div class="hero-metrics" aria-label="当前状态">
-          <span class="metric-pill">
-            <span>现在</span>
-            <strong id="current-time">--:--</strong>
-          </span>
+          <div class="now-panel glass-fluff" aria-live="polite">
+            <div class="now-head">
+              <span class="now-label">现在</span>
+              <span class="now-date"><span id="now-date">----------</span><span id="now-weekday" class="now-weekday"></span></span>
+            </div>
+            <strong class="now-clock" id="now-clock">--:--:--</strong>
+            <span class="now-lunar" id="now-lunar"></span>
+          </div>
         </div>
       </div>
 
@@ -46,6 +50,7 @@
             <strong id="spotlight-days">--</strong>
             <span id="spotlight-unit">天</span>
           </div>
+          <p class="spotlight-date" id="spotlight-date"></p>
           <div class="tag-row spotlight-tags" id="spotlight-tags"></div>
         </div>
       </div>

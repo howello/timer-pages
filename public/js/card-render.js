@@ -110,6 +110,7 @@
     var unitEl = document.getElementById('spotlight-unit');
     var titleEl = document.getElementById('spotlight-title');
     var tagsEl = document.getElementById('spotlight-tags');
+    var dateEl = document.getElementById('spotlight-date');
     if (!daysEl || !titleEl) return;
 
     if (!card) {
@@ -118,6 +119,7 @@
       if (unitEl) unitEl.textContent = '天';
       titleEl.textContent = '等待置顶';
       if (tagsEl) tagsEl.innerHTML = '';
+      if (dateEl) dateEl.textContent = '';
       return;
     }
 
@@ -129,10 +131,12 @@
       daysEl.textContent = String(t.days);
       daysEl.classList.remove('text-mode');
       if (unitEl) unitEl.textContent = t.isPast ? '天前' : '天';
+      if (dateEl) dateEl.textContent = describeCardDate(card, target);
     } catch (e) {
       daysEl.textContent = '--';
       daysEl.classList.remove('text-mode');
       if (unitEl) unitEl.textContent = '天';
+      if (dateEl) dateEl.textContent = '';
     }
 
     if (tagsEl) {

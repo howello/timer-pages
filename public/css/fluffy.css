@@ -228,26 +228,59 @@ p {
   gap: 10px;
 }
 
-.metric-pill {
-  min-width: 286px;
+.now-panel {
+  min-width: 300px;
   display: grid;
-  gap: 4px;
-  padding: 12px 14px;
-  border: 1px solid rgba(255, 255, 255, 0.68);
+  gap: 6px;
+  padding: 18px 22px;
+  border: 1px solid rgba(255, 255, 255, 0.72);
   border-radius: var(--radius);
-  background: rgba(255, 255, 255, 0.48);
-  box-shadow: var(--inner);
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.62), rgba(255, 255, 255, 0.38)),
+    rgba(255, 255, 255, 0.42);
+  box-shadow: var(--shadow-small), var(--inner);
 }
 
-.metric-pill span {
+.now-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.now-label {
   color: var(--muted);
   font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.14em;
 }
 
-.metric-pill strong {
-  font-size: 1.08rem;
+.now-date {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  color: #666d62;
+  font-size: 0.92rem;
   font-variant-numeric: tabular-nums;
+}
+
+.now-weekday {
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.now-clock {
+  font-size: 2.9rem;
+  line-height: 1.02;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
   white-space: nowrap;
+}
+
+.now-lunar {
+  color: #916a35;
+  font-size: 0.86rem;
+  min-height: 1em;
 }
 
 .time-instrument {
@@ -331,6 +364,16 @@ p {
   margin: 0;
   color: #666d62;
   line-height: 1.55;
+}
+
+.spotlight-date {
+  color: #916a35;
+  font-size: 0.82rem;
+  font-variant-numeric: tabular-nums;
+  min-height: 1em;
+  max-width: 100%;
+  padding: 0 8px;
+  line-height: 1.4;
 }
 
 .spotlight-tags {
@@ -1306,8 +1349,13 @@ textarea:focus {
     display: grid;
   }
 
-  .metric-pill {
+  .now-panel {
     min-width: 0;
+    padding: 16px 18px;
+  }
+
+  .now-clock {
+    font-size: 2.35rem;
   }
 
   .running-time {

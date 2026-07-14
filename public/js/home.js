@@ -267,17 +267,23 @@
   }
 
   function updateCurrentTime() {
-    var el = document.getElementById('current-time');
-    if (!el) return;
+    var clockEl = document.getElementById('now-clock');
+    if (!clockEl) return;
     var now = new Date();
-    if (window.TimeCalc && window.TimeCalc.formatClockWithLunar) {
-      el.textContent = window.TimeCalc.formatClockWithLunar(now);
+
+    if (window.TimeCalc && window.TimeCalc.formatClockParts) {
+      var parts = window.TimeCalc.formatClockParts(now);
+      clockEl.textContent = parts.time;
+      var dateEl = document.getElementById('now-date');
+      var weekdayEl = document.getElementById('now-weekday');
+      var lunarEl = document.getElementById('now-lunar');
+      if (dateEl) dateEl.textContent = parts.date;
+      if (weekdayEl) weekdayEl.textContent = parts.weekday;
+      if (lunarEl) lunarEl.textContent = parts.lunar;
       return;
     }
-    el.textContent = now.getFullYear() + '-' +
-      String(now.getMonth() + 1).padStart(2, '0') + '-' +
-      String(now.getDate()).padStart(2, '0') + ' ' +
-      String(now.getHours()).padStart(2, '0') + ':' +
+
+    clockEl.textContent = String(now.getHours()).padStart(2, '0') + ':' +
       String(now.getMinutes()).padStart(2, '0') + ':' +
       String(now.getSeconds()).padStart(2, '0');
   }
