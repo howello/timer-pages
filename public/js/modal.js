@@ -49,6 +49,14 @@
     if (titleEl) fields._title = titleEl;
   }
 
+  function notify(message) {
+    if (window.UIAlert && window.UIAlert.alert) {
+      window.UIAlert.alert(message, { title: '提示' });
+    } else {
+      window.alert(message);
+    }
+  }
+
   function toggleCalendarFields(isLunar) {
     var solarFields = document.querySelectorAll('.solar-field');
     var lunarFields = document.querySelectorAll('.lunar-field');
@@ -151,18 +159,18 @@
       var isLeapStr = fields.isLeapMonth ? fields.isLeapMonth.value : 'false';
       eventData.isLeapMonth = isLeapStr === 'true';
       if (!eventData.lunarMonth || !eventData.lunarDay) {
-        alert('请填写农历月份和日期');
+        notify('请填写农历月份和日期');
         return;
       }
     } else {
       if (!eventData.date) {
-        alert('请选择目标日期');
+        notify('请选择目标日期');
         return;
       }
     }
 
     if (!eventData.title) {
-      alert('请填写事件名称');
+      notify('请填写事件名称');
       return;
     }
 

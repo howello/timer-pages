@@ -187,7 +187,8 @@ function formatClockWithLunar(date) {
 }
 
 function shouldShowDayCount(event) {
-  return !(event && event.calendar === DateSystem.LUNAR && event.type !== EventType.FESTIVAL);
+  // 农历事件同样会被换算为具体公历日期，天数可以正常计算，一律显示
+  return true;
 }
 
 function shouldHideCard(event, now = new Date()) {

@@ -33,8 +33,8 @@
     if (window.TimeCalc && window.TimeCalc.shouldShowDayCount && !window.TimeCalc.shouldShowDayCount(card)) {
       return '';
     }
-    var prefix = t.isPast ? '已过去' : '还有';
-    return prefix + ' ' + t.days + ' 天';
+    // 只显示天数，不带「已过去/还有」前缀
+    return t.days + ' 天';
   }
 
   function getCardTheme(card) {
@@ -106,53 +106,35 @@
   }
 
   function renderSpotlight(card) {
-    var typeEl = document.getElementById('spotlight-type');
     var daysEl = document.getElementById('spotlight-days');
     var unitEl = document.getElementById('spotlight-unit');
     var titleEl = document.getElementById('spotlight-title');
-    var dateEl = document.getElementById('spotlight-date');
-    var noteEl = document.getElementById('spotlight-note');
     var tagsEl = document.getElementById('spotlight-tags');
-    if (!typeEl || !daysEl || !titleEl) return;
+    if (!daysEl || !titleEl) return;
 
     if (!card) {
-      typeEl.textContent = 'PINNED';
       daysEl.textContent = '--';
       daysEl.classList.remove('text-mode');
       if (unitEl) unitEl.textContent = '天';
       titleEl.textContent = '等待置顶';
-      if (dateEl) dateEl.textContent = '置顶一个事件后会显示完整信息';
-      if (noteEl) noteEl.textContent = '';
       if (tagsEl) tagsEl.innerHTML = '';
       return;
     }
 
-    typeEl.textContent = TYPE_LABELS[card.type] || '事件';
-    titleEl.textContent = card.title || card.name || '未命名';
-    var target = null;
+    // 顶部标题：优先显示备注，没有备注再显示事件名称
+    titleEl.textContent = card.note || card.title || card.name || '未命名';
     try {
-      target = window.TimeCalc.resolveTargetDate(card);
+      var target = window.TimeCalc.resolveTargetDate(card);
       var t = window.TimeCalc.diff(new Date(), target);
-      if (window.TimeCalc.shouldShowDayCount && !window.TimeCalc.shouldShowDayCount(card)) {
-        daysEl.textContent = '农历';
-        daysEl.classList.add('text-mode');
-        if (unitEl) unitEl.textContent = '';
-      } else {
-        daysEl.textContent = String(t.days);
-        daysEl.classList.remove('text-mode');
-        if (unitEl) unitEl.textContent = t.isPast ? '天前' : '天';
-      }
+      daysEl.textContent = String(t.days);
+      daysEl.classList.remove('text-mode');
+      if (unitEl) unitEl.textContent = t.isPast ? '天前' : '天';
     } catch (e) {
       daysEl.textContent = '--';
       daysEl.classList.remove('text-mode');
       if (unitEl) unitEl.textContent = '天';
     }
 
-    if (dateEl) dateEl.textContent = describeCardDate(card, target);
-    if (noteEl) {
-      noteEl.textContent = card.note || (card.isOffDay ? '法定节假日' : '');
-      noteEl.style.display = noteEl.textContent ? '' : 'none';
-    }
     if (tagsEl) {
       tagsEl.innerHTML = '';
       buildTags(card).forEach(function (tag) {
@@ -179,55 +161,38 @@
     article.setAttribute('data-id', card.id);
     article.setAttribute('draggable', 'true');
 
-    // 拖拽句柄
-    var handle = document.createElement('button');
-    handle.className = 'drag-handle';
-    handle.type = 'button';
-    handle.setAttribute('aria-label', '拖动排序');
-    handle.textContent = '⋮⋮';
-    handle.draggable = false;
-    article.appendChild(handle);
-
-    // 信息区域
-    var info = document.createElement('div');
-    info.className = 'card-info';
-
+    // 左上角标题：优先显示备注，没有备注再显示事件名称
     var title = document.createElement('h3');
-    title.textContent = card.title || card.name || '未命名';
-    info.appendChild(title);
+    title.className = 'card-title';
+    title.textContent = card.note || card.title || card.name || '未命名';
+    article.appendChild(title);
 
-    appendTags(info, card);
-
-    // 走动时间显示
+    // 中间天数
     var timeDiv = document.createElement('div');
     timeDiv.className = 'running-time';
     if (window.TimeCalc && window.TimeCalc.shouldShowDayCount && !window.TimeCalc.shouldShowDayCount(card)) {
       timeDiv.classList.add('is-hidden');
       timeDiv.textContent = '';
     } else {
-      timeDiv.textContent = '-- 天 --:--:--';
+      timeDiv.textContent = '--';
     }
-    info.appendChild(timeDiv);
+    article.appendChild(timeDiv);
 
-    // 备注
-    if (card.note) {
-      var note = document.createElement('p');
-      note.className = 'card-note';
-      note.textContent = card.note;
-      info.appendChild(note);
-    }
+    // 左下角 tag
+    appendTags(article, card);
 
-    article.appendChild(info);
-
+    // 右下角操作按钮（图标，悬停显示）
     var actions = document.createElement('div');
     actions.className = 'card-actions';
 
     // 置顶按钮
     var pinBtn = document.createElement('button');
-    pinBtn.className = 'pin-button' + (card.pinned ? ' active' : '');
+    pinBtn.className = 'icon-action' + (card.pinned ? ' active' : '');
     pinBtn.type = 'button';
-    pinBtn.textContent = card.pinned ? '已置顶' : '置顶';
+    pinBtn.textContent = card.pinned ? '★' : '☆';
     pinBtn.setAttribute('aria-label', card.pinned ? '取消置顶' : '置顶');
+    pinBtn.setAttribute('title', card.pinned ? '取消置顶' : '置顶');
+    pinBtn.draggable = false;
     pinBtn.addEventListener('click', function () {
       if (opts.onPin) opts.onPin(card.id);
     });
@@ -236,10 +201,12 @@
     // 编辑按钮（仅自定义事件）
     if (!isFestival && opts.onEdit) {
       var editBtn = document.createElement('button');
-      editBtn.className = 'soft-icon-button';
+      editBtn.className = 'icon-action';
       editBtn.type = 'button';
       editBtn.textContent = '✎';
       editBtn.setAttribute('aria-label', '编辑');
+      editBtn.setAttribute('title', '编辑');
+      editBtn.draggable = false;
       editBtn.addEventListener('click', function () {
         opts.onEdit(card);
       });
@@ -249,11 +216,12 @@
     // 删除按钮（仅自定义事件）
     if (!isFestival && opts.onDelete) {
       var delBtn = document.createElement('button');
-      delBtn.className = 'soft-icon-button';
+      delBtn.className = 'icon-action is-danger';
       delBtn.type = 'button';
-      delBtn.textContent = '×';
+      delBtn.textContent = '🗑';
       delBtn.setAttribute('aria-label', '删除');
-      delBtn.style.color = '#e74c3c';
+      delBtn.setAttribute('title', '删除');
+      delBtn.draggable = false;
       delBtn.addEventListener('click', function () {
         opts.onDelete(card.id);
       });

@@ -189,8 +189,20 @@ p {
   width: 112px;
   height: 8px;
   border-radius: var(--radius);
-  background: linear-gradient(90deg, var(--coral), var(--butter), var(--mint), var(--sky));
+  background: linear-gradient(90deg, var(--coral), var(--butter), var(--mint), var(--sky), var(--plum), var(--coral));
+  background-size: 300% 100%;
   box-shadow: var(--shadow-small);
+  animation: rainbowFlow 4s linear infinite;
+}
+
+@keyframes rainbowFlow {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  100% {
+    background-position: 300% 50%;
+  }
 }
 
 .hero-copy h1 {
@@ -504,16 +516,12 @@ p {
   visibility: visible;
 }
 
-.list-toolbar,
-.list-card {
+.list-toolbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
   padding: 12px;
-}
-
-.list-toolbar {
   position: relative;
   overflow: hidden;
 }
@@ -535,13 +543,19 @@ p {
 }
 
 .list-card {
+  position: relative;
   min-width: 0;
   min-height: 230px;
   display: grid;
-  grid-template-columns: 40px minmax(0, 1fr);
-  align-content: start;
-  align-items: start;
+  grid-template-rows: auto 1fr auto;
+  align-content: stretch;
+  padding: 14px;
+  cursor: grab;
   transition: transform 180ms ease, opacity 180ms ease, border-color 180ms ease;
+}
+
+.list-card:active {
+  cursor: grabbing;
 }
 
 .list-card h3,
@@ -549,35 +563,82 @@ p {
   margin: 0;
 }
 
-.list-card p {
-  margin-top: 5px;
-  color: var(--muted);
-  font-size: 0.84rem;
+/* 左上角标题 */
+.list-card .card-title {
+  grid-row: 1;
+  justify-self: start;
+  max-width: 100%;
+  font-size: 1.02rem;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
 }
 
+/* 中间天数 */
 .list-card .running-time {
-  margin-top: 18px;
-  font-size: 1.35rem;
+  grid-row: 2;
+  align-self: center;
+  justify-self: center;
+  margin: 12px 0;
+  font-size: 2.6rem;
+  text-align: center;
 }
 
-.list-card .card-info {
-  grid-column: 1 / -1;
-  width: 100%;
+/* 左下角 tag */
+.list-card .tag-row {
+  grid-row: 3;
+  justify-self: start;
+  align-self: end;
+  margin-top: 0;
 }
 
-.list-card .drag-handle {
-  grid-column: 1;
-  grid-row: 1;
-}
-
+/* 右下角操作按钮：悬停显示 */
 .card-actions {
-  grid-column: 2;
-  grid-row: 1;
-  justify-self: end;
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
   display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 8px;
+  gap: 6px;
+  opacity: 0;
+  transform: translateY(4px);
+  pointer-events: none;
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+
+.list-card:hover .card-actions,
+.list-card:focus-within .card-actions {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.icon-action {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: var(--radius);
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.62);
+  box-shadow: var(--shadow-small);
+  font-size: 0.92rem;
+  line-height: 1;
+  transition: transform 160ms ease, background 160ms ease;
+}
+
+.icon-action:hover {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.82);
+}
+
+.icon-action.active {
+  color: #b8860b;
+  background: rgba(239, 200, 91, 0.36);
+}
+
+.icon-action.is-danger {
+  color: #d0453f;
 }
 
 .list-card.pinned {
@@ -911,6 +972,99 @@ textarea:focus {
 .app-toast.is-visible {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
+}
+
+/* 自建弹窗 / loading */
+.ui-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: rgba(74, 67, 54, 0.22);
+  backdrop-filter: blur(8px);
+  opacity: 0;
+  transition: opacity 200ms ease;
+}
+
+.ui-dialog-backdrop.is-open {
+  opacity: 1;
+}
+
+.ui-dialog {
+  width: min(400px, calc(100vw - 32px));
+  display: grid;
+  gap: 14px;
+  padding: 24px;
+  text-align: center;
+  transform: translateY(12px) scale(0.98);
+  transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.ui-dialog-backdrop.is-open .ui-dialog {
+  transform: translateY(0) scale(1);
+}
+
+.ui-dialog-title {
+  margin: 0;
+  font-size: 1.24rem;
+  font-weight: 900;
+  color: var(--ink);
+}
+
+.ui-dialog-message {
+  margin: 0;
+  color: #666d62;
+  font-size: 0.96rem;
+  line-height: 1.6;
+}
+
+.ui-dialog-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.ui-dialog-actions > * {
+  min-width: 96px;
+  flex: 0 1 auto;
+}
+
+.primary-fluff.is-danger {
+  background: linear-gradient(135deg, #e87670, #d9534f);
+  color: #fff;
+}
+
+.ui-loading-backdrop {
+  background: rgba(74, 67, 54, 0.16);
+}
+
+.ui-loading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 18px 24px;
+}
+
+.ui-loading-text {
+  color: var(--ink);
+  font-size: 0.92rem;
+  font-weight: 800;
+}
+
+.ui-spinner {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 3px solid rgba(232, 118, 112, 0.25);
+  border-top-color: var(--coral);
+  animation: uiSpin 0.7s linear infinite;
+}
+
+@keyframes uiSpin {
+  to { transform: rotate(360deg); }
 }
 
 .password-page {

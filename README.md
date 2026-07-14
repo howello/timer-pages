@@ -8,8 +8,10 @@
 - **D1 存储**：事件配置以单行 JSON 快照存于 D1 `app_config` 表
 - **静态资源**：通过 Workers Static Assets binding 从 `./public` 提供，无构建打包
 - **密码保护**：单密码访问，HMAC-SHA256 签名的 HttpOnly cookie 会话
-- **农历支持**：使用 lunar-javascript 库支持农历日期转换
+- **农历支持**：使用 lunar-javascript 库支持农历日期转换，公历/农历事件均计算天数
 - **响应式设计**：桌面多列网格、移动单栏
+- **自建交互组件**：统一风格的 confirm/alert 弹窗，操作互斥防抖 + loading 遮罩
+- **拖拽排序**：整卡拖拽（支持触屏），操作按钮悬停显示
 
 ## 项目结构
 
@@ -18,7 +20,18 @@
 │   ├── index.html
 │   ├── password.html
 │   ├── css/fluffy.css
-│   └── js/            # 前端模块
+│   └── js/             # 前端模块（无构建，按序在 index.html 引入）
+│       ├── config.js       # 运行时配置加载
+│       ├── access-gate.js  # 会话校验 / 登出
+│       ├── lunar.js         # 农历 ↔ 公历换算（包裹 lunar-javascript）
+│       ├── time-calc.js     # 时间差计算、日期归约、时钟+农历格式化
+│       ├── holiday.js       # 节假日数据获取
+│       ├── api-client.js    # 后端 D1 读写
+│       ├── store.js         # 事件数据中心（合并自定义事件与节假日）
+│       ├── alert.js         # 自建 confirm/alert/loading 与操作防抖
+│       ├── card-render.js   # 首页圆盘与列表卡片渲染
+│       ├── modal.js         # 新增/编辑弹窗
+│       └── home.js          # 主页装配：滚动揭示、置顶、拖拽、增删改
 ├── src/
 │   └── worker.js      # Workers 入口：路由 + 会话 + 全部端点
 ├── schema.sql          # D1 建表 SQL

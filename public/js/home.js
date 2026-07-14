@@ -71,12 +71,16 @@
   function bindScrollReveal() {
     var header = document.getElementById('floating-header');
     var revealed = document.getElementById('revealed-list');
+    var listRevealed = false;
 
     function update() {
       var showHeader = window.scrollY > 80;
-      var showList = window.scrollY > 260;
       if (header) header.classList.toggle('is-visible', showHeader);
-      if (revealed) revealed.classList.toggle('is-visible', showList);
+      // 列表一旦揭示就保持可见，避免过滤后内容变矮导致 scrollY 回落再被隐藏
+      if (revealed && !listRevealed && window.scrollY > 260) {
+        listRevealed = true;
+        revealed.classList.add('is-visible');
+      }
     }
 
     window.addEventListener('scroll', update, { passive: true });
@@ -89,6 +93,7 @@
 
     tabs.querySelectorAll('.category-tab').forEach(function (tab) {
       tab.addEventListener('click', function () {
+        if (window.UIAlert && window.UIAlert.isBusy()) return;
         activeFilter = tab.getAttribute('data-filter') || 'all';
         tabs.querySelectorAll('.category-tab').forEach(function (item) {
           item.classList.toggle('active', item === tab);
@@ -108,9 +113,12 @@
 
     var syncBtn = document.getElementById('sync-btn');
     if (syncBtn) {
-      syncBtn.addEventListener('click', function () {
-        loadAndRender();
-        showToast('已重新同步');
+      syncBtn.addEventListener('click', async function () {
+        if (window.UIAlert && window.UIAlert.isBusy()) return;
+        await window.UIAlert.runExclusive(async function () {
+          await loadAndRender();
+          showToast('已重新同步');
+        }, '同步中…');
       });
     }
 
@@ -129,8 +137,8 @@
   }
 
   function bindModalSubmit() {
-    window.Modal.onSubmit(async function (eventData, editingEvent) {
-      try {
+    window.Modal.onSubmit(function (eventData, editingEvent) {
+      return window.UIAlert.runExclusive(async function () {
         if (editingEvent && editingEvent.id) {
           eventData.id = editingEvent.id;
           eventData.pinned = editingEvent.pinned;
@@ -144,22 +152,17 @@
         window.Modal.close();
         cards = window.EventStore.getSortedCards();
         renderAll();
-      } catch (error) {
-        console.error('保存事件失败:', error);
-        alert('保存失败：' + error.message);
-      }
+      }, editingEvent && editingEvent.id ? '更新中…' : '保存中…');
     });
   }
 
   async function handlePin(id) {
-    try {
+    await window.UIAlert.runExclusive(async function () {
       await window.EventStore.togglePin(id);
       cards = window.EventStore.getSortedCards();
       renderAll();
-    } catch (error) {
-      console.error('置顶失败:', error);
-      alert('置顶失败：' + error.message);
-    }
+      showToast('事件已置顶');
+    }, '置顶中…');
   }
 
   function handleEdit(card) {
@@ -175,16 +178,14 @@
       showToast('节假日数据来自 API，不能删除');
       return;
     }
-    if (!confirm('确认删除这个事件吗？')) return;
-    try {
+    var ok = await window.UIAlert.confirm('确认删除这个事件吗？', { title: '请确认', confirmText: '删除', danger: true });
+    if (!ok) return;
+    await window.UIAlert.runExclusive(async function () {
       await window.EventStore.remove(id);
       cards = window.EventStore.getSortedCards();
       renderAll();
       showToast('事件已删除');
-    } catch (error) {
-      console.error('删除失败:', error);
-      alert('删除失败：' + error.message);
-    }
+    }, '删除中…');
   }
 
   function bindDragAndDrop() {
@@ -223,6 +224,7 @@
 
     list.addEventListener('drop', async function (e) {
       e.preventDefault();
+      if (window.UIAlert && window.UIAlert.isBusy()) return;
       var visibleIds = Array.from(list.querySelectorAll('.list-card')).map(function (el) {
         return el.getAttribute('data-id');
       });
@@ -230,15 +232,12 @@
         .map(function (card) { return card.id; })
         .filter(function (id) { return visibleIds.indexOf(id) === -1; });
       var ids = visibleIds.concat(hiddenIds);
-      try {
+      await window.UIAlert.runExclusive(async function () {
         await window.EventStore.reorder(ids);
         cards = window.EventStore.getSortedCards();
         renderAll();
         showToast('排序已保存');
-      } catch (error) {
-        console.error('排序失败:', error);
-        alert('排序失败：' + error.message);
-      }
+      }, '排序中…');
     });
 
     // 触屏拖拽兼容层
