@@ -549,7 +549,7 @@ git commit -m "style: 首屏双面板响应式断点（980/680/420）"
 - Consumes: Task 1（HTML 已移除旧节点）+ Task 2/3（新规则已就位）。
 - Produces: 精简后的 `fluffy.css`，无 `.hero-copy`/`.dial-*`/`.spotlight-*`/`.time-instrument`/`.feature-card`/`.fixed-card-stage`/`titleGlow`/`instrumentFloat`/`rainbowFlow` 等死规则。
 
-- [ ] **Step 1: Grep 确认每条待删规则无引用**
+- [x] **Step 1: Grep 确认每条待删规则无引用**
 
 在仓库根运行（用 Grep 工具，`output_mode: content`）确认下列 class/keyframe 在 `public/index.html` 与 `public/js/*.js` 中**除 CSS 自身定义外**无引用：
 
@@ -563,7 +563,7 @@ Expected: 上述每个 class 在 `public/index.html` 与 `public/js/*.js` 中 0 
 
 > 注意：Task 1 的新 HTML 使用了 `.now-weekday`、`.solar-date`、`.lunar-date`、`.date-group` 等与新 `.now-surface` 体系同名的 class，这些是**新规则**（Task 2 已加），不要误删。只删上面列出的**旧** class。
 
-- [ ] **Step 2: 删除旧 hero/spotlight/dial 规则块**
+- [x] **Step 2: 删除旧 hero/spotlight/dial 规则块**
 
 在 `public/css/fluffy.css` 中删除以下整块规则（约第 181–386 行区间，按实际行号定位，逐块删）：
 
@@ -593,11 +593,11 @@ Expected: 上述每个 class 在 `public/index.html` 与 `public/js/*.js` 中 0 
 
 > 实操建议：用 Edit 工具按每个 selector 精确定位删除，不要一次性大段替换，避免误伤。`fluffSheen` keyframe 被 `.feature-card::before`、`.add-event-modal::before`、`.password-card::before` 共用——删 `.feature-card::before` 后 `fluffSheen` 仍被 modal/password 用，**保留 `fluffSheen`**。
 
-- [ ] **Step 3: 删除响应式断点中残留的旧 hero 规则**
+- [x] **Step 3: 删除响应式断点中残留的旧 hero 规则**
 
 检查 `@media` 断点内是否还有 Step 1 列出的旧 class 残留（Task 3 已改写部分，但可能漏删）。逐个删除 `≤980/≤680/≤420` 媒体查询里残留的 `.hero-copy h1`、`.hero-lede`、`.hero-metrics`、`.time-instrument`、`.fixed-card-stage`、`.feature-card`、`.now-panel`、`.now-clock` 等行。
 
-- [ ] **Step 4: 语法/视觉回归验证**
+- [x] **Step 4: 语法/视觉回归验证**
 
 Run: `npx wrangler dev`
 浏览器打开首页桌面 + 680 + 420 三档：
@@ -605,7 +605,7 @@ Run: `npx wrangler dev`
 - hero 双面板样式正常（Task 2/3 的效果保持）。
 - DevTools Console 无 404、无 `Uncaught`。
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add public/css/fluffy.css
