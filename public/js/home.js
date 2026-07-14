@@ -75,11 +75,11 @@
     function update() {
       var y = window.scrollY;
       if (header) header.classList.toggle('is-visible', y > 80);
-      // 列表与标题对称：下滑越过 260 显示，上滑回落到 160 以下隐藏（滞回避免抖动）。
+      // hero 改矮（桌面约 340px）：下调阈值，下滑越过 180 显示，上滑回落到 100 以下隐藏。
       // 列表区有 min-height 兜底，过滤后内容变矮也不会把 scrollY 夹到阈值以下，避免空白。
       if (revealed) {
-        if (y > 260) revealed.classList.add('is-visible');
-        else if (y < 160) revealed.classList.remove('is-visible');
+        if (y > 180) revealed.classList.add('is-visible');
+        else if (y < 100) revealed.classList.remove('is-visible');
       }
     }
 
@@ -267,25 +267,37 @@
   }
 
   function updateCurrentTime() {
-    var clockEl = document.getElementById('now-clock');
-    if (!clockEl) return;
+    var hmEl = document.getElementById('now-clock-hm');
+    if (!hmEl) return;
     var now = new Date();
 
     if (window.TimeCalc && window.TimeCalc.formatClockParts) {
       var parts = window.TimeCalc.formatClockParts(now);
-      clockEl.textContent = parts.time;
-      var dateEl = document.getElementById('now-date');
+      // time 形如 "HH:MM:SS"，局部拆为时分主号与秒次号，不扩展 time-calc.js 公共签名
+      var timeParts = parts.time.split(':');
+      hmEl.textContent = timeParts[0] + ':' + timeParts[1];
+      var secEl = document.getElementById('now-clock-sec');
+      if (secEl) secEl.textContent = ':' + timeParts[2];
+
+      // 公历日期：直接从 now 构建中文形（移动端 .nd-year 由 CSS 隐藏）
+      var yearEl = document.querySelector('#now-date .nd-year');
+      var mdEl = document.querySelector('#now-date .nd-md');
+      if (yearEl) yearEl.textContent = now.getFullYear() + '年';
+      if (mdEl) mdEl.textContent = (now.getMonth() + 1) + '月' + now.getDate() + '日';
+
       var weekdayEl = document.getElementById('now-weekday');
+      if (weekdayEl) weekdayEl.textContent = ' · ' + parts.weekday; // parts.weekday 形如 "星期二"
+
       var lunarEl = document.getElementById('now-lunar');
-      if (dateEl) dateEl.textContent = parts.date;
-      if (weekdayEl) weekdayEl.textContent = parts.weekday;
-      if (lunarEl) lunarEl.textContent = parts.lunar;
+      if (lunarEl) lunarEl.textContent = parts.lunar; // formatLunarLabel 失败返回 ''，留白不报错
       return;
     }
 
-    clockEl.textContent = String(now.getHours()).padStart(2, '0') + ':' +
-      String(now.getMinutes()).padStart(2, '0') + ':' +
-      String(now.getSeconds()).padStart(2, '0');
+    // 降级：无 TimeCalc 时直接拼（极小概率，保留兜底）
+    var pad = function (n) { return String(n).padStart(2, '0'); };
+    hmEl.textContent = pad(now.getHours()) + ':' + pad(now.getMinutes());
+    var secEl2 = document.getElementById('now-clock-sec');
+    if (secEl2) secEl2.textContent = ':' + pad(now.getSeconds());
   }
 
   function showToast(message) {
