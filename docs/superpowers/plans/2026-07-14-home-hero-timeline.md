@@ -791,7 +791,7 @@ git commit -m "feat: hero 面板数据层（getHeroMoments/formatMomentCountdown
   - `renderHeroTimeline(cards)` — 构建右侧三行 DOM 并挂到 `#hero-moments`
   - `buildMomentRow(card, isPinned)` → `HTMLElement`（模块内私有）
 
-- [ ] **Step 1: 新增 `buildMomentRow(card, isPinned)`**
+- [x] **Step 1: 新增 `buildMomentRow(card, isPinned)`**
 
 在 `public/js/card-render.js` 的 `formatMomentDateParts` 之后追加：
 
@@ -897,7 +897,7 @@ git commit -m "feat: hero 面板数据层（getHeroMoments/formatMomentCountdown
 - 置顶行不设内联 `style.background`，让 CSS `.pinned .type-mark` 渐变生效（避免内联优先级冲突）。
 - 农历行只渲染 `.md-lunar`，不渲染 year/md/week；置顶农历行尾部追加 `.md-pin`（移动端显「· 置顶」）。
 
-- [ ] **Step 2: 新增 `renderHeroTimeline(cards)`**
+- [x] **Step 2: 新增 `renderHeroTimeline(cards)`**
 
 紧接 `buildMomentRow` 之后追加：
 
@@ -926,7 +926,7 @@ git commit -m "feat: hero 面板数据层（getHeroMoments/formatMomentCountdown
   }
 ```
 
-- [ ] **Step 3: 临时接线以便验证（Task 7 会正式接线）**
+- [x] **Step 3: 临时接线以便验证（Task 7 会正式接线）**
 
 为在浏览器里看到效果，临时在 `renderFixed` 函数体最前面加一行调用（Task 7 会重写整个 `renderFixed`，此处临时接线不冲突）：
 
@@ -936,12 +936,12 @@ git commit -m "feat: hero 面板数据层（getHeroMoments/formatMomentCountdown
     renderHeroTimeline(cards);
 ```
 
-- [ ] **Step 4: 语法校验**
+- [x] **Step 4: 语法校验**
 
 Run: `node --check public/js/card-render.js`
 Expected: 无输出（退出码 0）。
 
-- [ ] **Step 5: 浏览器验证三行渲染**
+- [x] **Step 5: 浏览器验证三行渲染**
 
 Run: `npx wrangler dev`
 浏览器打开首页。根据当前数据状态观察右侧 `#hero-moments`：
@@ -962,7 +962,7 @@ EventStore.load = async () => {}; // 屏蔽网络
 window.CardRender.renderFixed([{id:'t1',type:'countdown',calendar:'solar',date:'2026-11-19',pinned:true,title:'结婚纪念日'},{id:'t2',type:'countdown',calendar:'solar',date:'2026-07-26',title:'旅行出发'},{id:'t3',type:'recurring',calendar:'lunar',lunarMonth:7,lunarDay:7,title:'七夕'}]);
 ```
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add public/js/card-render.js
