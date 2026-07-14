@@ -25,38 +25,36 @@
       </div>
     </header>
 
-    <section class="hero-stage" aria-labelledby="hero-title">
-      <div class="hero-copy">
-        <p class="eyebrow">TIME COUNTDOWN</p>
-        <h1 id="hero-title">把重要的日子，摆在光里。</h1>
-        <p class="hero-lede">用一块柔软的时间面板，安放节日、纪念日和每一个正在靠近的计划。</p>
-        <div class="hero-metrics" aria-label="当前状态">
-          <div class="now-panel glass-fluff" aria-live="polite">
-            <div class="now-head">
-              <span class="now-label">现在</span>
-              <span class="now-date"><span id="now-date">----------</span><span id="now-weekday" class="now-weekday"></span></span>
-            </div>
-            <strong class="now-clock" id="now-clock">--:--:--</strong>
-            <span class="now-lunar" id="now-lunar"></span>
+    <section class="hero-stage">
+      <section class="fluffy-surface now-surface" aria-labelledby="now-title">
+        <div class="now-top">
+          <div class="rainbow-rail" aria-hidden="true"></div>
+          <h2 class="section-kicker" id="now-title">NOW · 现在</h2>
+          <div class="clock-line">
+            <span class="clock-hm" id="now-clock-hm">--:--</span>
+            <span class="clock-sec" id="now-clock-sec">:--</span>
           </div>
         </div>
-      </div>
+        <div class="date-group">
+          <span class="solar-date">
+            <span id="now-date"><span class="nd-year">----</span><span class="nd-md">--月--日</span></span>
+            <span id="now-weekday" class="now-weekday"></span>
+          </span>
+          <span class="lunar-date" id="now-lunar"></span>
+        </div>
+      </section>
 
-      <div class="time-instrument" id="spotlight-card" aria-live="polite">
-        <div class="dial-lines"></div>
-        <div class="dial-face">
-          <h2 id="spotlight-title">等待置顶</h2>
-          <div class="spotlight-count">
-            <strong id="spotlight-days">--</strong>
-            <span id="spotlight-unit">天</span>
+      <section class="fluffy-surface timeline-surface" aria-labelledby="timeline-title">
+        <div class="timeline-head">
+          <div>
+            <span class="section-kicker">IMPORTANT MOMENTS</span>
+            <h2 class="timeline-title" id="timeline-title">重要时间</h2>
           </div>
-          <p class="spotlight-date" id="spotlight-date"></p>
-          <div class="tag-row spotlight-tags" id="spotlight-tags"></div>
+          <span class="timeline-hint">置顶 + 最近两项</span>
         </div>
-      </div>
+        <div class="moment-list" id="hero-moments"></div>
+      </section>
     </section>
-
-<!--    <section class="fixed-card-stage" id="fixed-card-stage" aria-label="置顶倒计时"></section>-->
 
     <section class="revealed-list" id="revealed-list">
       <div class="list-toolbar glass-fluff">
