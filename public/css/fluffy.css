@@ -404,42 +404,6 @@ p {
   text-align: center;
 }
 
-.now-clock {
-  font-size: 2.9rem;
-  line-height: 1.02;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: 0.02em;
-  white-space: nowrap;
-}
-
-.now-lunar {
-  color: #916a35;
-  font-size: 0.86rem;
-  min-height: 1em;
-}
-
-.fixed-card-stage {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 16px;
-  width: min(640px, 100%);
-  margin: 0 auto;
-  padding: 8px 0 40px;
-}
-
-.feature-card {
-  position: relative;
-  min-width: 0;
-  min-height: 278px;
-  display: grid;
-  align-content: space-between;
-  gap: 18px;
-  padding: 20px;
-  overflow: hidden;
-  transition: transform 180ms ease, box-shadow 180ms ease;
-}
-
-.feature-card::before,
 .add-event-modal::before,
 .password-card::before {
   content: "";
@@ -450,22 +414,6 @@ p {
   background: linear-gradient(115deg, transparent 0 18%, rgba(255, 255, 255, 0.5) 38%, transparent 56%);
   transform: translateX(-72%);
   animation: fluffSheen 6.5s ease-in-out infinite;
-}
-
-.feature-card::after {
-  content: "";
-  position: absolute;
-  left: 20px;
-  right: 20px;
-  bottom: 18px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(45, 51, 45, 0.22), transparent);
-}
-
-.feature-card h2 {
-  margin: 0 0 12px;
-  font-size: 2.5rem;
-  line-height: 1.04;
 }
 
 .tag-row {
@@ -520,31 +468,6 @@ p {
 .tag-elapsed {
   color: #82679a;
   background: rgba(168, 146, 187, 0.14);
-}
-
-.feature-card p {
-  margin: 0;
-  color: var(--muted);
-  line-height: 1.6;
-}
-
-.feature-card.coral,
-.feature-card.rose {
-  background:
-    linear-gradient(145deg, rgba(232, 118, 112, 0.2), rgba(255, 255, 255, 0.38)),
-    rgba(255, 250, 239, 0.76);
-}
-
-.feature-card.mint {
-  background:
-    linear-gradient(145deg, rgba(120, 181, 156, 0.22), rgba(255, 255, 255, 0.38)),
-    rgba(255, 250, 239, 0.76);
-}
-
-.feature-card.sky {
-  background:
-    linear-gradient(145deg, rgba(134, 184, 215, 0.24), rgba(255, 255, 255, 0.38)),
-    rgba(255, 250, 239, 0.76);
 }
 
 .card-info {
@@ -880,7 +803,6 @@ p {
 .pin-button:hover,
 .drag-handle:hover,
 .list-card:hover,
-.feature-card:hover,
 .logout-button:hover {
   transform: translateY(-2px);
 }
