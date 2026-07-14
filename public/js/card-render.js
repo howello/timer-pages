@@ -308,6 +308,41 @@
     });
   }
 
+  /**
+   * 每秒刷新 hero 右侧行内天数/倒计时文本，避免整块重建闪烁
+   * 若事件集合（id 顺序）变化（如跨零点、置顶到达），回退为 renderHeroTimeline 全量重建。
+   * @param {Array} cards
+   */
+  function refreshHeroMoments(cards) {
+    var container = document.getElementById('hero-moments');
+    if (!container) return;
+    var moments = getHeroMoments(cards);
+    var existingRows = container.querySelectorAll('.moment-row');
+    var existingIds = Array.prototype.map.call(existingRows, function (el) {
+      return el.getAttribute('data-id');
+    });
+    var newIds = moments.map(function (m) { return m.card.id; });
+
+    var sameSet = existingIds.length === newIds.length &&
+      newIds.every(function (id, i) { return existingIds[i] === id; });
+
+    if (!sameSet) {
+      renderHeroTimeline(cards);
+      return;
+    }
+
+    // 集合稳定：仅更新行内天数/倒计时文本
+    moments.forEach(function (item) {
+      var row = container.querySelector('.moment-row[data-id="' + item.card.id + '"]');
+      if (!row) return;
+      var cd = formatMomentCountdown(item.card);
+      var num = row.querySelector('.days-number');
+      var lab = row.querySelector('.days-label');
+      if (num) num.textContent = cd.number;
+      if (lab) lab.textContent = cd.label;
+    });
+  }
+
   function describeCardDate(card, target) {
     if (!card) return '';
 
@@ -328,51 +363,6 @@
     }
 
     return card.date ? '目标 ' + card.date : '';
-  }
-
-  function renderSpotlight(card) {
-    var daysEl = document.getElementById('spotlight-days');
-    var unitEl = document.getElementById('spotlight-unit');
-    var titleEl = document.getElementById('spotlight-title');
-    var tagsEl = document.getElementById('spotlight-tags');
-    var dateEl = document.getElementById('spotlight-date');
-    if (!daysEl || !titleEl) return;
-
-    if (!card) {
-      daysEl.textContent = '--';
-      daysEl.classList.remove('text-mode');
-      if (unitEl) unitEl.textContent = '天';
-      titleEl.textContent = '等待置顶';
-      if (tagsEl) tagsEl.innerHTML = '';
-      if (dateEl) dateEl.textContent = '';
-      return;
-    }
-
-    // 顶部标题：优先显示备注，没有备注再显示事件名称
-    titleEl.textContent = card.note || card.title || card.name || '未命名';
-    try {
-      var target = window.TimeCalc.resolveTargetDate(card);
-      var t = window.TimeCalc.diff(new Date(), target);
-      daysEl.textContent = String(t.days);
-      daysEl.classList.remove('text-mode');
-      if (unitEl) unitEl.textContent = t.isPast ? '天前' : '天';
-      if (dateEl) dateEl.textContent = describeCardDate(card, target);
-    } catch (e) {
-      daysEl.textContent = '--';
-      daysEl.classList.remove('text-mode');
-      if (unitEl) unitEl.textContent = '天';
-      if (dateEl) dateEl.textContent = '';
-    }
-
-    if (tagsEl) {
-      tagsEl.innerHTML = '';
-      buildTags(card).forEach(function (tag) {
-        var el = document.createElement('span');
-        el.className = 'tag tag-' + tag.tone;
-        el.textContent = tag.label;
-        tagsEl.appendChild(el);
-      });
-    }
   }
 
   /**
@@ -463,57 +453,11 @@
   }
 
   /**
-   * 渲染固定卡片区
+   * 渲染固定卡片区（首屏 hero 右侧时间轴）
    * @param {Array} cards - 全部卡片（已排序）
    */
   function renderFixed(cards) {
     renderHeroTimeline(cards);
-    var spotlight = getPinnedCard(cards);
-    renderSpotlight(spotlight);
-
-    var container = document.querySelector('.fixed-card-stage');
-    if (!container) return;
-    container.innerHTML = '';
-
-    var fixedCards = spotlight ? [spotlight] : [];
-
-    fixedCards.forEach(function (card) {
-      // 固定卡片使用简化版 DOM，不包含拖拽/编辑/删除按钮
-      var article = document.createElement('article');
-      article.className = 'feature-card glass-fluff ' + (COLOR_MAP[card.type] || 'mint') + ' ' + getCardTheme(card);
-      article.setAttribute('data-id', card.id);
-
-      var info = document.createElement('div');
-      info.className = 'card-info';
-
-      var title = document.createElement('h2');
-      title.textContent = card.title || card.name || '未命名';
-      info.appendChild(title);
-
-      appendTags(info, card);
-
-      // 走动时间显示
-      var timeDiv = document.createElement('div');
-      timeDiv.className = 'running-time';
-      if (window.TimeCalc && window.TimeCalc.shouldShowDayCount && !window.TimeCalc.shouldShowDayCount(card)) {
-        timeDiv.classList.add('is-hidden');
-        timeDiv.textContent = '';
-      } else {
-        timeDiv.textContent = '-- 天 --:--:--';
-      }
-      info.appendChild(timeDiv);
-
-      // 备注
-      if (card.note) {
-        var note = document.createElement('p');
-        note.className = 'card-note';
-        note.textContent = card.note;
-        info.appendChild(note);
-      }
-
-      article.appendChild(info);
-      container.appendChild(article);
-    });
   }
 
   /**
@@ -539,7 +483,7 @@
    */
   function refreshRunningTimes(cards) {
     var now = new Date();
-    renderSpotlight(getPinnedCard(cards));
+    refreshHeroMoments(cards);
     getRenderableCards(cards).forEach(function (card) {
       var target;
       try {
@@ -583,7 +527,11 @@
     createCard: createCard,
     renderFixed: renderFixed,
     renderList: renderList,
-    renderSpotlight: renderSpotlight,
+    getHeroMoments: getHeroMoments,
+    renderHeroTimeline: renderHeroTimeline,
+    refreshHeroMoments: refreshHeroMoments,
+    formatMomentCountdown: formatMomentCountdown,
+    getPinnedCard: getPinnedCard,
     getRenderableCards: getRenderableCards,
     refreshRunningTimes: refreshRunningTimes,
     startLiveTimer: startLiveTimer,
