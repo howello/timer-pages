@@ -417,7 +417,7 @@ git commit -m "style: 首屏双面板与三行时间轴桌面样式"
 **Interfaces:**
 - Produces: `>980/≤980/≤680/≤420` 四档断点的新规则，覆盖 hero 双面板。
 
-- [ ] **Step 1: 改写 `≤980px` 断点中的 hero 规则**
+- [x] **Step 1: 改写 `≤980px` 断点中的 hero 规则**
 
 找到 `@media (max-width: 980px) { ... }`（约第 1228–1246 行）。把其中与 hero 相关的旧规则（`.hero-copy h1`、`.time-instrument`）整块删除，并在该媒体查询块内新增：
 
@@ -431,7 +431,7 @@ git commit -m "style: 首屏双面板与三行时间轴桌面样式"
 
 说明：≤980 两面板上下堆叠，「现在」在上、「重要时间」在下。
 
-- [ ] **Step 2: 改写 `≤680px` 断点中的 hero 规则**
+- [x] **Step 2: 改写 `≤680px` 断点中的 hero 规则**
 
 找到 `@media (max-width: 680px) { ... }`（约第 1248–1340 行）。删除其中与 hero 旧节点相关的规则：`.hero-stage`(旧 min-height/padding)、`.hero-copy h1`、`.hero-lede`、`.time-instrument`、`.fixed-card-stage`、`.feature-card`、`.feature-card h2`。在该媒体查询块内新增：
 
@@ -483,7 +483,7 @@ git commit -m "style: 首屏双面板与三行时间轴桌面样式"
 
 说明：非置顶行移动端仍显星期（`.md-week` 默认 inline，仅 `.pinned .md-week` 隐藏）；置顶行移动端显 `.md-pin`、隐 `.pin-chip`。
 
-- [ ] **Step 3: 改写 `≤420px` 断点中的 hero 规则**
+- [x] **Step 3: 改写 `≤420px` 断点中的 hero 规则**
 
 找到 `@media (max-width: 420px) { ... }`（约第 1342–1368 行）。删除其中旧 hero 规则（`.hero-copy h1`、`.hero-metrics`、`.now-panel`、`.now-clock`）。在该媒体查询块内新增：
 
@@ -520,7 +520,7 @@ git commit -m "style: 首屏双面板与三行时间轴桌面样式"
 
 说明：超窄屏进一步缩号，但天数、事件名称、置顶状态保持可见（无 `display:none`）。
 
-- [ ] **Step 4: 验证四档断点布局**
+- [x] **Step 4: 验证四档断点布局**
 
 Run: `npx wrangler dev`
 浏览器打开 DevTools → Toggle device toolbar，依次验证宽度 1240 / 980 / 680 / 420 / 320 px：
@@ -531,7 +531,7 @@ Run: `npx wrangler dev`
 
 （`#hero-moments` 仍空，仅看面板外壳布局。）
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add public/css/fluffy.css
