@@ -128,7 +128,7 @@ git commit -m "feat: 首屏双面板 HTML 骨架（现在 + 重要时间）"
 **Interfaces:**
 - Produces: `.hero-stage`(改写为双列 grid)、`.now-surface`/`.timeline-surface`、`.rainbow-rail`、`.section-kicker`、`.clock-line`/`.clock-hm`/`.clock-sec`、`.date-group`/`.solar-date`/`.lunar-date`/`.nd-year`/`.nd-md`/`.now-weekday`、`.timeline-head`/`.timeline-title`/`.timeline-hint`、`.moment-list`/`.moment-row`(含 `.pinned`)/`.days-box`/`.days-number`/`.days-label`/`.moment-copy`/`.moment-name`/`.moment-date`/`.md-year`/`.md-md`/`.md-week`/`.md-lunar`/`.md-pin`/`.type-mark`/`.pin-chip`/`.timeline-empty` 的桌面基线样式。
 
-- [ ] **Step 1: 改写 `.hero-stage` 为双列 grid**
+- [x] **Step 1: 改写 `.hero-stage` 为双列 grid**
 
 在 `public/css/fluffy.css` 中，找到现有 `.hero-stage { ... }` 规则（约第 172–179 行），将其整块替换为：
 
@@ -144,7 +144,7 @@ git commit -m "feat: 首屏双面板 HTML 骨架（现在 + 重要时间）"
 
 说明：去掉旧的 `min-height:520px` 与 `align-items:center`；`0.78/1.22` 对齐视觉稿 39/61。响应式断点在 Task 3 处理。
 
-- [ ] **Step 2: 新增双面板外壳与「现在」面板样式**
+- [x] **Step 2: 新增双面板外壳与「现在」面板样式**
 
 在 `.hero-stage` 规则之后追加：
 
@@ -241,7 +241,7 @@ git commit -m "feat: 首屏双面板 HTML 骨架（现在 + 重要时间）"
 
 说明：`.fluffy-surface` 在本仓库原来没有统一基类（原 `.glass-fluff` 用于 header/list），此处新增给 hero 两个面板；不破坏已有 `.glass-fluff`。`::after` 是低强度玻璃高光，非循环动画。
 
-- [ ] **Step 3: 新增「重要时间」面板与三行卡片样式**
+- [x] **Step 3: 新增「重要时间」面板与三行卡片样式**
 
 紧接 Step 2 之后追加：
 
@@ -391,7 +391,7 @@ git commit -m "feat: 首屏双面板 HTML 骨架（现在 + 重要时间）"
 - `.md-pin` 桌面默认 `display:none`，移动端置顶行由 Task 3 媒体查询显示。
 - `.type-mark` 非置顶默认 `--mint`；JS 会按 type 内联覆盖为 `--mint/--sky/--plum`；置顶行由 `.pinned .type-mark` 渐变覆盖（CSS 类优先级高于内联 `style` 需注意——Task 6 Step 3 对置顶行不设内联背景，故不冲突）。
 
-- [ ] **Step 4: 验证桌面样式渲染**
+- [x] **Step 4: 验证桌面样式渲染**
 
 Run: `npx wrangler dev`（如已运行可跳过）
 浏览器打开首页。当前 `#hero-moments` 仍空（Task 6 才填），但应能看到：
@@ -400,7 +400,7 @@ Run: `npx wrangler dev`（如已运行可跳过）
 - 右侧 `IMPORTANT MOMENTS` kicker + `重要时间` 标题 + `置顶 + 最近两项` hint，下方空白。
 - 无水平溢出、无旧圆盘/标题残留。
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add public/css/fluffy.css
