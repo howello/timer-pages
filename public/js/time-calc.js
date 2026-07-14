@@ -165,15 +165,17 @@ function formatDateOnly(date) {
 }
 
 function formatLunarLabel(date) {
-  const lunarLib = window.Lunar || (typeof Lunar !== 'undefined' ? Lunar : null);
-  if (!lunarLib || !lunarLib.Solar || !lunarLib.Solar.fromDate) {
+  // lunar-javascript 为 UMD 包，浏览器下将 Solar/Lunar 各自挂为顶级全局，
+  // 并非 Lunar.Solar，故直接引用全局 Solar。
+  const SolarLib = (typeof Solar !== 'undefined') ? Solar : (window.Solar || null);
+  if (!SolarLib || !SolarLib.fromDate) {
     return '';
   }
 
   try {
-    const lunar = lunarLib.Solar.fromDate(date).getLunar();
+    const lunar = SolarLib.fromDate(date).getLunar();
     if (!lunar || !lunar.getMonthInChinese || !lunar.getDayInChinese) return '';
-    return '农历' + lunar.getMonthInChinese() + lunar.getDayInChinese();
+    return '农历' + lunar.getMonthInChinese() + '月' + lunar.getDayInChinese();
   } catch (error) {
     console.warn('农历日期格式化失败:', error);
     return '';

@@ -1,139 +1,103 @@
 /**
  * 农历换算模块
  * 包裹 lunar-javascript 库，提供农历日期到公历日期的转换
+ *
+ * 注意：lunar-javascript 是 UMD 包，在浏览器环境下会把 Solar / Lunar 等
+ * 各自挂到全局（window.Solar、window.Lunar），而不是 window.Lunar.Solar。
+ * 因此这里直接使用顶级的 Solar / Lunar。
+ * 闰月由负数月份表示（如 -6 表示闰六月），库没有 getLeapMonth() 实例方法。
  */
+(function (window) {
+  'use strict';
 
-/**
- * 计算下一次农历日期对应的公历日期
- * @param {number} month - 农历月份（1-12），负数表示闰月（如 -8 表示闰八月）
- * @param {number} day - 农历日期（1-30）
- * @param {boolean} isLeap - 是否闰月（已废弃，使用负数月份表示）
- * @returns {Date} 下一次该农历日期对应的公历 Date 对象
- */
-function nextSolarOfLunar(month, day, isLeap = false) {
-  if (typeof Lunar === 'undefined') {
-    throw new Error('lunar-javascript 库未加载');
+  /**
+   * 获取库的 Solar / Lunar 顶级对象
+   * @returns {{Solar: Object, Lunar: Object}|null}
+   */
+  function getLib() {
+    var Solar = window.Solar || (typeof Solar !== 'undefined' ? Solar : null);
+    var Lunar = window.Lunar || (typeof Lunar !== 'undefined' ? Lunar : null);
+    if (!Solar || !Solar.fromYmd || !Lunar || !Lunar.fromYmd) return null;
+    return { Solar: Solar, Lunar: Lunar };
   }
 
-  // 处理闰月：如果 month 为负数，表示闰月
-  const isLeapMonth = month < 0 || isLeap;
-  const actualMonth = Math.abs(month);
+  /**
+   * 获取指定农历日期对应的公历日期
+   * @param {number} year - 期望落在的公历年份
+   * @param {number} month - 农历月份（1-12）
+   * @param {number} day - 农历日期（1-30）
+   * @param {boolean} isLeap - 是否闰月
+   * @returns {Date|null} 公历 Date 对象，该年份不存在该农历日期时返回 null
+   */
+  function getLunarDate(year, month, day, isLeap) {
+    var lib = getLib();
+    if (!lib) return null;
 
-  // 验证参数
-  if (actualMonth < 1 || actualMonth > 12) {
-    throw new Error(`农历月份必须在 1-12 之间，当前值: ${actualMonth}`);
+    try {
+      // 由公历年份 1 月 1 日推算对应的农历年份
+      var lunarYearAtStart = lib.Solar.fromYmd(year, 1, 1).getLunar().getYear();
+      // 闰月用负数月份表示
+      var m = isLeap ? -Math.abs(month) : Math.abs(month);
+
+      // 农历年可能与公历年错位，向前后各探一年，取落在目标公历年的结果
+      var candidates = [lunarYearAtStart, lunarYearAtStart - 1, lunarYearAtStart + 1];
+      for (var i = 0; i < candidates.length; i++) {
+        try {
+          var lunar = lib.Lunar.fromYmd(candidates[i], m, day);
+          var solar = lunar.getSolar();
+          var date = new Date(solar.getYear(), solar.getMonth() - 1, solar.getDay(), 0, 0, 0, 0);
+          if (date.getFullYear() === year) {
+            return date;
+          }
+        } catch (inner) {
+          // 该农历年不存在此（闰）月/日，继续尝试下一年
+        }
+      }
+      return null;
+    } catch (error) {
+      console.warn('获取农历日期失败: ' + year + '年 ' + (isLeap ? '闰' : '') + month + '月' + day + '日', error);
+      return null;
+    }
   }
-  if (day < 1 || day > 30) {
-    throw new Error(`农历日期必须在 1-30 之间，当前值: ${day}`);
-  }
 
-  const now = new Date();
-  const currentYear = now.getFullYear();
+  /**
+   * 计算下一次农历日期对应的公历日期（用于周期性农历事件）
+   * @param {number} month - 农历月份（1-12），负数表示闰月
+   * @param {number} day - 农历日期（1-30）
+   * @param {boolean} [isLeap=false] - 是否闰月
+   * @returns {Date} 下一次该农历日期对应的公历 Date 对象
+   */
+  function nextSolarOfLunar(month, day, isLeap) {
+    isLeap = month < 0 || isLeap === true;
+    var actualMonth = Math.abs(month);
 
-  // 尝试当前年份
-  let targetDate = getLunarDate(currentYear, actualMonth, day, isLeapMonth);
+    if (actualMonth < 1 || actualMonth > 12) {
+      throw new Error('农历月份必须在 1-12 之间，当前值: ' + actualMonth);
+    }
+    if (day < 1 || day > 30) {
+      throw new Error('农历日期必须在 1-30 之间，当前值: ' + day);
+    }
+    if (!getLib()) {
+      throw new Error('lunar-javascript 库未加载');
+    }
 
-  // 如果目标日期早于今天，则尝试下一年
-  if (targetDate && targetDate < now) {
-    targetDate = getLunarDate(currentYear + 1, actualMonth, day, isLeapMonth);
-  }
+    var now = new Date();
+    var startYear = now.getFullYear();
 
-  // 如果还是找不到，再尝试下下一年（处理农历年不存在的情况）
-  if (!targetDate || targetDate < now) {
-    targetDate = getLunarDate(currentYear + 2, actualMonth, day, isLeapMonth);
-  }
-
-  if (!targetDate) {
-    throw new Error(`无法找到农历 ${isLeapMonth ? '闰' : ''}${actualMonth}月${day}日对应的未来公历日期`);
-  }
-
-  return targetDate;
-}
-
-/**
- * 获取指定农历日期对应的公历日期
- * @param {number} year - 公历年份
- * @param {number} month - 农历月份（1-12）
- * @param {number} day - 农历日期（1-30）
- * @param {boolean} isLeap - 是否闰月
- * @returns {Date|null} 公历 Date 对象，如果该年份不存在该农历日期则返回 null
- */
-function getLunarDate(year, month, day, isLeap) {
-  try {
-    // 使用 lunar-javascript 的 Lunar.fromYmd 方法
-    // 注意：lunar-javascript 的年份是农历年份，需要从公历年份推算
-
-    // 先获取公历年份对应的农历信息
-    const solarDate = Lunar.Solar.fromYmd(year, 1, 1);
-    const lunarYear = solarDate.getLunar().getYear();
-
-    // 尝试当前农历年
-    let lunar = tryGetLunar(lunarYear, month, day, isLeap);
-    if (lunar) {
-      const solar = lunar.getSolar();
-      const date = new Date(solar.getYear(), solar.getMonth() - 1, solar.getDay(), 0, 0, 0, 0);
-      if (date.getFullYear() === year) {
+    // 从今年起向后探三年，取第一个不早于当前时刻的日期
+    for (var y = startYear; y <= startYear + 2; y++) {
+      var date = getLunarDate(y, actualMonth, day, isLeap);
+      if (date && date >= now) {
         return date;
       }
     }
 
-    // 如果不在当前农历年，尝试前一年和后一年
-    lunar = tryGetLunar(lunarYear - 1, month, day, isLeap);
-    if (lunar) {
-      const solar = lunar.getSolar();
-      const date = new Date(solar.getYear(), solar.getMonth() - 1, solar.getDay(), 0, 0, 0, 0);
-      if (date.getFullYear() === year) {
-        return date;
-      }
-    }
-
-    lunar = tryGetLunar(lunarYear + 1, month, day, isLeap);
-    if (lunar) {
-      const solar = lunar.getSolar();
-      const date = new Date(solar.getYear(), solar.getMonth() - 1, solar.getDay(), 0, 0, 0, 0);
-      if (date.getFullYear() === year) {
-        return date;
-      }
-    }
-
-    return null;
-  } catch (error) {
-    console.warn(`获取农历日期失败: ${year}年 ${isLeap ? '闰' : ''}${month}月${day}日`, error);
-    return null;
+    throw new Error('无法找到农历 ' + (isLeap ? '闰' : '') + actualMonth + '月' + day + '日对应的未来公历日期');
   }
-}
 
-/**
- * 尝试获取农历日期对象
- * @param {number} lunarYear - 农历年份
- * @param {number} month - 农历月份
- * @param {number} day - 农历日期
- * @param {boolean} isLeap - 是否闰月
- * @returns {Lunar|null} Lunar 对象或 null
- */
-function tryGetLunar(lunarYear, month, day, isLeap) {
-  try {
-    const lunar = Lunar.Lunar.fromYmd(lunarYear, month, day);
-
-    // 验证闰月是否匹配
-    if (isLeap && lunar.getMonth() !== month) {
-      return null; // 不是闰月或月份不匹配
-    }
-    if (isLeap && !lunar.getLeapMonth()) {
-      return null; // 不是闰月
-    }
-    if (!isLeap && lunar.getLeapMonth() && lunar.getMonth() === month) {
-      return null; // 要求非闰月但获取到了闰月
-    }
-
-    return lunar;
-  } catch (error) {
-    return null;
-  }
-}
-
-// 导出函数
-window.LunarHelper = {
-  nextSolarOfLunar,
-  getLunarDate
-};
+  // 导出函数
+  window.LunarHelper = {
+    nextSolarOfLunar: nextSolarOfLunar,
+    getLunarDate: getLunarDate
+  };
+})(window);
