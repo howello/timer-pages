@@ -170,12 +170,238 @@ p {
 }
 
 .hero-stage {
-  min-height: 520px;
   display: grid;
-  grid-template-columns: minmax(0, 1.08fr) minmax(300px, 0.92fr);
-  align-items: center;
-  gap: 28px;
+  grid-template-columns: minmax(0, 0.78fr) minmax(0, 1.22fr);
+  align-items: stretch;
+  gap: 20px;
   padding: 54px 8px 24px;
+}
+
+/* —— 首屏双面板 —— */
+.fluffy-surface {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.76);
+  border-radius: var(--radius);
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.26)),
+    var(--paper);
+  box-shadow: var(--shadow);
+}
+
+.fluffy-surface::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(118deg, transparent 20%, rgba(255, 255, 255, 0.32) 42%, transparent 62%);
+  transform: translateX(-62%);
+}
+
+.now-surface {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 28px;
+}
+
+.rainbow-rail {
+  width: 82px;
+  height: 6px;
+  border-radius: 8px;
+  background: linear-gradient(90deg, var(--coral), var(--butter), var(--mint), var(--sky), var(--plum));
+  box-shadow: var(--shadow-small);
+}
+
+.section-kicker {
+  display: block;
+  margin-top: 18px;
+  color: #916a35;
+  font-size: 0.67rem;
+  font-weight: 500;
+  letter-spacing: 0.09em;
+}
+
+.clock-line {
+  display: flex;
+  align-items: baseline;
+  margin-top: 10px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.055em;
+}
+
+.clock-hm {
+  font-size: 3.55rem;
+  font-weight: 500;
+  line-height: 0.96;
+}
+
+.clock-sec {
+  margin-left: 5px;
+  color: #916a35;
+  font-size: 1.15rem;
+  font-weight: 500;
+}
+
+.date-group {
+  display: grid;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.solar-date {
+  font-size: 0.86rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.now-weekday {
+  color: var(--muted);
+}
+
+.lunar-date {
+  color: var(--muted);
+  font-size: 0.7rem;
+  min-height: 1em;
+}
+
+.timeline-surface {
+  padding: 26px;
+}
+
+.timeline-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.timeline-head .section-kicker {
+  margin-top: 0;
+}
+
+.timeline-title {
+  margin: 4px 0 0;
+  font-size: 1.22rem;
+  font-weight: 500;
+}
+
+.timeline-hint {
+  color: var(--muted);
+  font-size: 0.64rem;
+}
+
+.moment-list {
+  display: grid;
+  gap: 8px;
+}
+
+.moment-row {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  min-height: 70px;
+  padding: 10px 12px;
+  border: 1px solid rgba(121, 103, 72, 0.12);
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.34);
+  box-shadow: var(--inner);
+}
+
+.moment-row.pinned {
+  border-color: rgba(232, 118, 112, 0.24);
+  background:
+    linear-gradient(100deg, rgba(232, 118, 112, 0.12), rgba(239, 200, 91, 0.08)),
+    rgba(255, 255, 255, 0.34);
+}
+
+.days-box {
+  display: grid;
+  justify-items: center;
+  line-height: 1;
+}
+
+.days-number {
+  font-size: 1.34rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.days-label {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 0.57rem;
+}
+
+.days-label:empty {
+  display: none;
+}
+
+.moment-copy {
+  min-width: 0;
+}
+
+.moment-name {
+  overflow: hidden;
+  font-size: 0.84rem;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.moment-date {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 0.64rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.md-year,
+.md-md,
+.md-week,
+.md-lunar,
+.md-pin {
+  display: inline;
+}
+
+.type-mark {
+  width: 8px;
+  height: 34px;
+  border-radius: 8px;
+  background: var(--mint);
+}
+
+.moment-row.pinned .type-mark {
+  background: linear-gradient(180deg, var(--coral), var(--butter));
+}
+
+.pin-chip {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  margin-left: 5px;
+  padding: 2px 5px;
+  border-radius: 999px;
+  color: #7b4c2d;
+  background: rgba(239, 200, 91, 0.22);
+  font-size: 0.55rem;
+  vertical-align: 1px;
+}
+
+.md-pin {
+  display: none; /* 桌面默认隐藏，移动端 ≤680 置顶行显示 */
+}
+
+.timeline-empty {
+  margin: 8px 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+  text-align: center;
 }
 
 .hero-copy {
