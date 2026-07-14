@@ -191,6 +191,123 @@
     };
   }
 
+  /**
+   * 构建单行 hero 时间轴 DOM（只读，无操作按钮）
+   * @param {Object} card
+   * @param {boolean} isPinned
+   * @returns {HTMLElement}
+   */
+  function buildMomentRow(card, isPinned) {
+    var target;
+    try {
+      target = window.TimeCalc.resolveTargetDate(card);
+    } catch (e) {
+      target = null;
+    }
+    var cd = formatMomentCountdown(card);
+    var dateParts = target ? formatMomentDateParts(card, target) : { year: '', md: '', week: '', lunar: '' };
+    var name = card.note || card.title || card.name || '未命名';
+
+    var row = document.createElement('div');
+    row.className = 'moment-row' + (isPinned ? ' pinned' : '');
+    row.setAttribute('data-id', card.id);
+
+    // 左：天数/倒计时
+    var daysBox = document.createElement('div');
+    daysBox.className = 'days-box';
+    var num = document.createElement('span');
+    num.className = 'days-number';
+    num.textContent = cd.number;
+    var lab = document.createElement('span');
+    lab.className = 'days-label';
+    lab.textContent = cd.label;
+    daysBox.appendChild(num);
+    daysBox.appendChild(lab);
+    row.appendChild(daysBox);
+
+    // 中：名称 + 目标日期
+    var copy = document.createElement('div');
+    copy.className = 'moment-copy';
+
+    var nameEl = document.createElement('div');
+    nameEl.className = 'moment-name';
+    nameEl.setAttribute('title', name); // 悬停显示完整名称
+    nameEl.textContent = name;
+    if (isPinned) {
+      var chip = document.createElement('span');
+      chip.className = 'pin-chip';
+      chip.textContent = '置顶';
+      nameEl.appendChild(chip);
+    }
+    copy.appendChild(nameEl);
+
+    var dateEl = document.createElement('div');
+    dateEl.className = 'moment-date';
+    if (dateParts.lunar) {
+      var l = document.createElement('span');
+      l.className = 'md-lunar';
+      l.textContent = dateParts.lunar;
+      dateEl.appendChild(l);
+    } else {
+      var y = document.createElement('span');
+      y.className = 'md-year';
+      y.textContent = dateParts.year;
+      dateEl.appendChild(y);
+      var md = document.createElement('span');
+      md.className = 'md-md';
+      md.textContent = dateParts.md;
+      dateEl.appendChild(md);
+      var w = document.createElement('span');
+      w.className = 'md-week';
+      w.textContent = dateParts.week;
+      dateEl.appendChild(w);
+    }
+    if (isPinned) {
+      var pin = document.createElement('span');
+      pin.className = 'md-pin';
+      pin.textContent = ' · 置顶';
+      dateEl.appendChild(pin);
+    }
+    copy.appendChild(dateEl);
+    row.appendChild(copy);
+
+    // 右：色条
+    var mark = document.createElement('span');
+    mark.className = 'type-mark';
+    mark.setAttribute('aria-hidden', 'true');
+    if (!isPinned) {
+      // 非置顶行按 type 取 mint/sky/plum；置顶行由 CSS .pinned .type-mark 渐变覆盖，不设内联
+      var colorName = HERO_MARK_MAP[card.type] || 'mint';
+      mark.style.background = 'var(--' + colorName + ')';
+    }
+    row.appendChild(mark);
+
+    return row;
+  }
+
+  /**
+   * 渲染 hero 右侧「重要时间」三行（整块构建）
+   * @param {Array} cards - EventStore.getSortedCards() 结果
+   */
+  function renderHeroTimeline(cards) {
+    var container = document.getElementById('hero-moments');
+    if (!container) return;
+    var moments = getHeroMoments(cards);
+    container.innerHTML = '';
+
+    if (!moments.length) {
+      var empty = document.createElement('p');
+      empty.className = 'timeline-empty';
+      empty.textContent = '还没有重要日子';
+      container.appendChild(empty);
+      return;
+    }
+
+    moments.forEach(function (item) {
+      container.appendChild(buildMomentRow(item.card, item.isPinned));
+    });
+  }
+
   function describeCardDate(card, target) {
     if (!card) return '';
 
@@ -350,6 +467,7 @@
    * @param {Array} cards - 全部卡片（已排序）
    */
   function renderFixed(cards) {
+    renderHeroTimeline(cards);
     var spotlight = getPinnedCard(cards);
     renderSpotlight(spotlight);
 
