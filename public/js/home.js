@@ -71,15 +71,15 @@
   function bindScrollReveal() {
     var header = document.getElementById('floating-header');
     var revealed = document.getElementById('revealed-list');
-    var listRevealed = false;
 
     function update() {
-      var showHeader = window.scrollY > 80;
-      if (header) header.classList.toggle('is-visible', showHeader);
-      // 列表一旦揭示就保持可见，避免过滤后内容变矮导致 scrollY 回落再被隐藏
-      if (revealed && !listRevealed && window.scrollY > 260) {
-        listRevealed = true;
-        revealed.classList.add('is-visible');
+      var y = window.scrollY;
+      if (header) header.classList.toggle('is-visible', y > 80);
+      // 列表与标题对称：下滑越过 260 显示，上滑回落到 160 以下隐藏（滞回避免抖动）。
+      // 列表区有 min-height 兜底，过滤后内容变矮也不会把 scrollY 夹到阈值以下，避免空白。
+      if (revealed) {
+        if (y > 260) revealed.classList.add('is-visible');
+        else if (y < 160) revealed.classList.remove('is-visible');
       }
     }
 
