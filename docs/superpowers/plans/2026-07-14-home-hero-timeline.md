@@ -984,7 +984,7 @@ git commit -m "feat: hero 右侧三行时间轴 DOM 渲染（renderHeroTimeline/
   - `refreshRunningTimes(cards)` — 改为先 `refreshHeroMoments` 再刷列表卡片
   - 导出表：移除 `renderSpotlight`，新增 `getHeroMoments`/`renderHeroTimeline`/`refreshHeroMoments`/`formatMomentCountdown`
 
-- [ ] **Step 1: 新增 `refreshHeroMoments(cards)`**
+- [x] **Step 1: 新增 `refreshHeroMoments(cards)`**
 
 在 `public/js/card-render.js` 的 `renderHeroTimeline` 之后追加：
 
@@ -1027,7 +1027,7 @@ git commit -m "feat: hero 右侧三行时间轴 DOM 渲染（renderHeroTimeline/
 
 说明：`festival:xxx` 这类 id 含 `:`，在属性选择器 `[data-id="festival:xxx"]` 中 `:` 不需转义（仅在无引号时才需），双引号包裹安全。
 
-- [ ] **Step 2: 重写 `renderFixed(cards)`**
+- [x] **Step 2: 重写 `renderFixed(cards)`**
 
 找到现有 `function renderFixed(cards) { ... }`（约第 244–291 行，含旧的 `getPinnedCard`/`renderSpotlight` 调用与 `.fixed-card-stage` DOM 构建），将其整个函数体替换为：
 
@@ -1043,7 +1043,7 @@ git commit -m "feat: hero 右侧三行时间轴 DOM 渲染（renderHeroTimeline/
 
 说明：删除旧的 spotlight 调用与 `.feature-card` DOM 构建逻辑（Task 4 已删对应 CSS）。`renderFixed` 名字保留，因 `home.js` 仍调用此名。
 
-- [ ] **Step 3: 改写 `refreshRunningTimes(cards)`**
+- [x] **Step 3: 改写 `refreshRunningTimes(cards)`**
 
 找到 `function refreshRunningTimes(cards) { ... }`（约第 314–334 行）。把第一行 `renderSpotlight(getPinnedCard(cards));` 替换为 `refreshHeroMoments(cards);`。完整函数应为：
 
@@ -1077,11 +1077,11 @@ git commit -m "feat: hero 右侧三行时间轴 DOM 渲染（renderHeroTimeline/
 
 说明：列表卡片的 `.running-time` 更新逻辑不变，只把 hero 部分从 `renderSpotlight` 换成 `refreshHeroMoments`。`startLiveTimer` 不改（仍每秒调 `refreshRunningTimes`）。
 
-- [ ] **Step 4: 删除 `renderSpotlight` 函数**
+- [x] **Step 4: 删除 `renderSpotlight` 函数**
 
 找到 `function renderSpotlight(card) { ... }`（约第 108–151 行），整块删除。
 
-- [ ] **Step 5: 更新 `window.CardRender` 导出**
+- [x] **Step 5: 更新 `window.CardRender` 导出**
 
 找到文件末尾的 `window.CardRender = { ... };`（约第 356–365 行），替换为：
 
@@ -1105,17 +1105,17 @@ git commit -m "feat: hero 右侧三行时间轴 DOM 渲染（renderHeroTimeline/
 
 说明：移除 `renderSpotlight` 导出；保留 `getPinnedCard`（设计 D2 要求作纯数据函数保留复用，即便本计划不再调用）。新增 4 个 hero 函数导出。
 
-- [ ] **Step 6: 语法校验**
+- [x] **Step 6: 语法校验**
 
 Run: `node --check public/js/card-render.js`
 Expected: 无输出（退出码 0）。
 
-- [ ] **Step 7: Grep 确认 `renderSpotlight` 全仓无残留**
+- [x] **Step 7: Grep 确认 `renderSpotlight` 全仓无残留**
 
 用 Grep 工具在 `public/` 搜索 `renderSpotlight`，Expected: 0 命中（JS + HTML + CSS）。
 再用 Grep 搜索 `spotlight-`（旧 DOM id），Expected: 0 命中（Task 1 已删 HTML，Task 4 已删 CSS）。
 
-- [ ] **Step 8: 浏览器验证每秒刷新无闪烁**
+- [x] **Step 8: 浏览器验证每秒刷新无闪烁**
 
 Run: `npx wrangler dev`
 浏览器打开首页，观察右侧三行：
@@ -1123,7 +1123,7 @@ Run: `npx wrangler dev`
 - 悬停某行：不出现按钮、不触发拖拽。
 - DevTools Elements 面板观察 `.moment-row` 节点：每秒只有 `.days-number`/`.days-label` 的文本子节点变化，`<div class="moment-row">` 本身不被替换。
 
-- [ ] **Step 9: Commit**
+- [x] **Step 9: Commit**
 
 ```bash
 git add public/js/card-render.js
