@@ -19,6 +19,17 @@
     elapsed: 'rose'
   };
 
+  // hero 时间轴色条映射（非置顶行用 mint/sky/plum，置顶行走 coral→butter 渐变）
+  var HERO_MARK_MAP = {
+    festival: 'mint',
+    countdown: 'sky',
+    recurring: 'plum',
+    elapsed: 'plum'
+  };
+
+  // 星期中文（用于 hero 行目标日期显示）
+  var WEEKDAY_LABELS = ['日', '一', '二', '三', '四', '五', '六'];
+
   var CARD_THEMES = ['theme-sunrise', 'theme-mint', 'theme-sky', 'theme-plum', 'theme-citrus'];
 
   var timerId = null;
@@ -81,6 +92,103 @@
     var visibleCards = getRenderableCards(cards);
     var pinned = visibleCards.filter(function (card) { return card.pinned === true; });
     return pinned[0] || visibleCards[0] || null;
+  }
+
+  /**
+   * 选取 hero 右侧「重要时间」面板至多三行事件
+   * 规则：已到/已过不进面板；置顶且未到固定第一行；其余按目标日期升序补足；置顶已到则回退为最近三个未到事件。
+   * @param {Array} cards - EventStore.getSortedCards() 结果
+   * @returns {Array<{card:Object, isPinned:boolean}>} 至多三行
+   */
+  function getHeroMoments(cards) {
+    var visible = getRenderableCards(cards);
+    var now = new Date();
+    var upcoming = [];
+
+    visible.forEach(function (card) {
+      var target;
+      try {
+        target = window.TimeCalc.resolveTargetDate(card);
+      } catch (e) {
+        return; // 无法解析目标的不进面板
+      }
+      var t = window.TimeCalc.diff(now, target);
+      if (t.isPast) return; // 已到/已过不进面板
+      upcoming.push({ card: card, target: target });
+    });
+
+    // 按目标公历日期升序
+    upcoming.sort(function (a, b) { return a.target - b.target; });
+
+    // 找未到的置顶项（已过的置顶已被上面过滤，自动回退）
+    var pinnedEntry = null;
+    for (var i = 0; i < upcoming.length; i++) {
+      if (upcoming[i].card.pinned === true) { pinnedEntry = upcoming[i]; break; }
+    }
+
+    var result = [];
+    if (pinnedEntry) {
+      result.push({ card: pinnedEntry.card, isPinned: true });
+    }
+    for (var j = 0; j < upcoming.length && result.length < 3; j++) {
+      if (upcoming[j] === pinnedEntry) continue; // 置顶已占第一行，去重
+      result.push({ card: upcoming[j].card, isPinned: false });
+    }
+    return result;
+  }
+
+  /**
+   * hero 面板专用倒计时文案：0 天转小时/分钟/即将
+   * @param {Object} card
+   * @returns {{number:string, label:string}} 数字与单位，分别填 .days-number / .days-label
+   */
+  function formatMomentCountdown(card) {
+    var target;
+    try {
+      target = window.TimeCalc.resolveTargetDate(card);
+    } catch (e) {
+      return { number: '--', label: '' };
+    }
+    var t = window.TimeCalc.diff(new Date(), target);
+    if (t.isPast) {
+      return { number: '0', label: '天后' }; // 防御性：理论不进面板
+    }
+    if (t.days > 0) {
+      return { number: String(t.days), label: '天后' };
+    }
+    if (t.hours > 0) {
+      return { number: String(t.hours), label: '小时后' };
+    }
+    if (t.minutes > 0) {
+      return { number: String(t.minutes), label: '分钟后' };
+    }
+    return { number: '即将', label: '' };
+  }
+
+  /**
+   * hero 行目标日期精简显示（去「目标/对应」前缀）
+   * 公历：2026年 / 8月19日 /  · 星期三
+   * 农历：农历七月初七（不重复对应公历）
+   * @param {Object} card
+   * @param {Date} target
+   * @returns {{year:string, md:string, week:string, lunar:string}}
+   */
+  function formatMomentDateParts(card, target) {
+    if (card.calendar === 'lunar') {
+      var lunarText = '';
+      try {
+        lunarText = window.TimeCalc.formatLunarLabel(target) || '';
+      } catch (e) {
+        lunarText = '';
+      }
+      return { year: '', md: '', week: '', lunar: lunarText || '农历日期' };
+    }
+    return {
+      year: target.getFullYear() + '年',
+      md: (target.getMonth() + 1) + '月' + target.getDate() + '日',
+      week: ' · 星期' + WEEKDAY_LABELS[target.getDay()],
+      lunar: ''
+    };
   }
 
   function describeCardDate(card, target) {
