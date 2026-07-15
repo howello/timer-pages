@@ -94,6 +94,23 @@ test('未来置顶项仍优先于日期更近的普通事件', function () {
   ]);
 });
 
+test('置顶项与至少三个未来候选只生成三行且不重复', function () {
+  const cardRender = loadCardRender();
+  const moments = cardRender.getHeroMoments([
+    { id: 'future-third', type: 'countdown', target: '2026-07-18T12:00:00.000Z' },
+    { id: 'pinned', type: 'countdown', target: '2026-08-01T12:00:00.000Z', pinned: true },
+    { id: 'future-nearest', type: 'countdown', target: '2026-07-16T12:00:00.000Z' },
+    { id: 'future-second', type: 'countdown', target: '2026-07-17T12:00:00.000Z' },
+    { id: 'future-fourth', type: 'countdown', target: '2026-07-19T12:00:00.000Z' }
+  ]);
+  const ids = Array.from(moments, function (item) { return item.card.id; });
+
+  assert.equal(moments.length, 3);
+  assert.deepEqual(ids, ['pinned', 'future-nearest', 'future-second']);
+  assert.equal(new Set(ids).size, ids.length);
+  assert.equal(ids.filter(function (id) { return id === 'pinned'; }).length, 1);
+});
+
 test('未置顶的过去事件仍不进入首屏候选', function () {
   const cardRender = loadCardRender();
   const moments = cardRender.getHeroMoments([
@@ -102,6 +119,29 @@ test('未置顶的过去事件仍不进入首屏候选', function () {
   ]);
 
   assert.deepEqual(Array.from(moments, function (item) { return item.card.id; }), ['future']);
+});
+
+test('无效日期的置顶项和普通项都不进入首屏候选', function () {
+  const cardRender = loadCardRender();
+  const moments = cardRender.getHeroMoments([
+    { id: 'invalid-pinned', type: 'countdown', target: 'not-a-date', pinned: true },
+    { id: 'invalid-regular', type: 'countdown', target: 'still-not-a-date' },
+    { id: 'future', type: 'countdown', target: '2026-07-16T12:00:00.000Z' }
+  ]);
+
+  assert.deepEqual(Array.from(moments, function (item) { return item.card.id; }), ['future']);
+});
+
+test('无效日期的 hero 倒计时显示占位符', function () {
+  const cardRender = loadCardRender();
+  const result = cardRender.formatMomentCountdown({
+    id: 'invalid',
+    type: 'countdown',
+    target: 'not-a-date',
+    pinned: true
+  });
+
+  assert.deepEqual({ number: result.number, label: result.label }, { number: '--', label: '' });
 });
 
 test('过去置顶项按天、小时、分钟和刚刚显示', function () {
@@ -135,4 +175,30 @@ test('未来文案保持天后语义', function () {
 
   assert.equal(result.number, '2');
   assert.equal(result.label, '天后');
+});
+
+test('过去与未来文案在整分、整时、整天和到点边界保持对称', function () {
+  const cardRender = loadCardRender();
+  const cases = [
+    ['过去 24 小时', '2026-07-14T12:00:00.000Z', '1', '天前'],
+    ['过去 60 分钟', '2026-07-15T11:00:00.000Z', '1', '小时前'],
+    ['过去 60 秒', '2026-07-15T11:59:00.000Z', '1', '分钟前'],
+    ['恰好到点', '2026-07-15T12:00:00.000Z', '即将', ''],
+    ['未来 60 秒', '2026-07-15T12:01:00.000Z', '1', '分钟后'],
+    ['未来 60 分钟', '2026-07-15T13:00:00.000Z', '1', '小时后'],
+    ['未来 24 小时', '2026-07-16T12:00:00.000Z', '1', '天后']
+  ];
+
+  cases.forEach(function (item) {
+    const result = cardRender.formatMomentCountdown({
+      id: item[0],
+      type: 'countdown',
+      target: item[1]
+    });
+    assert.deepEqual(
+      { number: result.number, label: result.label },
+      { number: item[2], label: item[3] },
+      item[0]
+    );
+  });
 });

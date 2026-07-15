@@ -32,6 +32,26 @@ function escapeRegExp(value) {
   return value.replace(/[.*+?^$()|[\]\\]/g, '\\$&');
 }
 
+function extractFunctionBody(source, name) {
+  const functionPattern = new RegExp(
+    '\\bfunction\\s+' + escapeRegExp(name) + '\\s*\\([^)]*\\)\\s*\\{'
+  );
+  const functionMatch = functionPattern.exec(source);
+  assert.ok(functionMatch, '缺少函数：' + name);
+  const openIndex = source.indexOf('{', functionMatch.index);
+  let depth = 0;
+
+  for (let i = openIndex; i < source.length; i++) {
+    if (source[i] === '{') depth++;
+    if (source[i] === '}') {
+      depth--;
+      if (depth === 0) return source.slice(openIndex + 1, i);
+    }
+  }
+
+  throw new Error('函数未闭合：' + name);
+}
+
 function getFinalProperty(source, selector, property) {
   const rulePattern = /([^{}]+)\{([^{}]*)\}/g;
   let match;
@@ -58,9 +78,10 @@ const mobileCss = extractMedia(css, 'max-width: 680px');
 
 test('密码输入使用 autofocus 并保留 JS focus 后备', function () {
   const inputTag = passwordHtml.match(/<input\b(?=[^>]*\bid="password-input")[^>]*>/i);
+  const initBody = extractFunctionBody(passwordJs, 'init');
   assert.ok(inputTag, '缺少 #password-input');
   assert.match(inputTag[0], /\bautofocus\b/i);
-  assert.match(passwordJs, /passwordInput\.focus\(\)/);
+  assert.match(initBody, /passwordInput\.focus\(\)/);
 });
 
 test('手机密码页只显示居中的密码卡', function () {

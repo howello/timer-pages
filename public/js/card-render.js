@@ -67,6 +67,15 @@
     });
   }
 
+  /**
+   * 判断值是否为有效日期。
+   * @param {*} value
+   * @returns {boolean}
+   */
+  function isValidDate(value) {
+    return value instanceof Date && Number.isFinite(value.getTime());
+  }
+
   function buildTags(card) {
     var tags = [];
     tags.push({ label: TYPE_LABELS[card.type] || card.type || '事件', tone: card.type || 'default' });
@@ -113,6 +122,7 @@
       } catch (e) {
         return;
       }
+      if (!isValidDate(target)) return;
 
       var entry = { card: card, target: target };
       var t = window.TimeCalc.diff(now, target);
@@ -137,7 +147,7 @@
   }
 
   /**
-   * hero 面板专用倒计时文案：0 天转小时/分钟/即将
+   * hero 面板专用倒计时文案：未来按天后/小时后/分钟后/即将，过去按天前/小时前/分钟前/刚刚分级。
    * @param {Object} card
    * @returns {{number:string, label:string}} 数字与单位，分别填 .days-number / .days-label
    */
@@ -148,6 +158,7 @@
     } catch (e) {
       return { number: '--', label: '' };
     }
+    if (!isValidDate(target)) return { number: '--', label: '' };
     var t = window.TimeCalc.diff(new Date(), target);
     if (t.isPast) {
       if (t.days > 0) {
