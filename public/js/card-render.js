@@ -96,13 +96,14 @@
 
   /**
    * 选取 hero 右侧「重要时间」面板至多三行事件
-   * 规则：已到/已过不进面板；置顶且未到固定第一行；其余按目标日期升序补足；置顶已到则回退为最近三个未到事件。
+   * 规则：可解析的置顶项无论过去或未来都固定第一行；其余仅从未来事件中按日期升序补足。
    * @param {Array} cards - EventStore.getSortedCards() 结果
    * @returns {Array<{card:Object, isPinned:boolean}>} 至多三行
    */
   function getHeroMoments(cards) {
     var visible = getRenderableCards(cards);
     var now = new Date();
+    var pinnedEntry = null;
     var upcoming = [];
 
     visible.forEach(function (card) {
@@ -110,29 +111,27 @@
       try {
         target = window.TimeCalc.resolveTargetDate(card);
       } catch (e) {
-        return; // 无法解析目标的不进面板
+        return;
       }
+
+      var entry = { card: card, target: target };
       var t = window.TimeCalc.diff(now, target);
-      if (t.isPast) return; // 已到/已过不进面板
-      upcoming.push({ card: card, target: target });
+      if (card.pinned === true && pinnedEntry === null) {
+        pinnedEntry = entry;
+      }
+      if (!t.isPast && card.pinned !== true) {
+        upcoming.push(entry);
+      }
     });
 
-    // 按目标公历日期升序
     upcoming.sort(function (a, b) { return a.target - b.target; });
-
-    // 找未到的置顶项（已过的置顶已被上面过滤，自动回退）
-    var pinnedEntry = null;
-    for (var i = 0; i < upcoming.length; i++) {
-      if (upcoming[i].card.pinned === true) { pinnedEntry = upcoming[i]; break; }
-    }
 
     var result = [];
     if (pinnedEntry) {
       result.push({ card: pinnedEntry.card, isPinned: true });
     }
-    for (var j = 0; j < upcoming.length && result.length < 3; j++) {
-      if (upcoming[j] === pinnedEntry) continue; // 置顶已占第一行，去重
-      result.push({ card: upcoming[j].card, isPinned: false });
+    for (var i = 0; i < upcoming.length && result.length < 3; i++) {
+      result.push({ card: upcoming[i].card, isPinned: false });
     }
     return result;
   }
@@ -151,7 +150,16 @@
     }
     var t = window.TimeCalc.diff(new Date(), target);
     if (t.isPast) {
-      return { number: '0', label: '天后' }; // 防御性：理论不进面板
+      if (t.days > 0) {
+        return { number: String(t.days), label: '天前' };
+      }
+      if (t.hours > 0) {
+        return { number: String(t.hours), label: '小时前' };
+      }
+      if (t.minutes > 0) {
+        return { number: String(t.minutes), label: '分钟前' };
+      }
+      return { number: '刚刚', label: '' };
     }
     if (t.days > 0) {
       return { number: String(t.days), label: '天后' };
