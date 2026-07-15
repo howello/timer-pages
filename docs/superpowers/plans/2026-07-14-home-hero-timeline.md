@@ -2,6 +2,7 @@
 change: home-hero-timeline
 design-doc: docs/superpowers/specs/2026-07-14-home-hero-timeline-design.md
 base-ref: 2b707d9efb14a956a15dfa2993c948aeac832140
+archived-with: 2026-07-14-home-hero-timeline
 ---
 
 # 首页首屏「现在 + 重要时间」双面板 实施计划
@@ -37,6 +38,7 @@ base-ref: 2b707d9efb14a956a15dfa2993c948aeac832140
 
 设计原图（class 命名/配色/尺寸直接参考）：`.superpowers/brainstorm/codex-20260714-1/content/hero-visual-design.html`（含桌面 + 移动两套变体）。
 
+archived-with: 2026-07-14-home-hero-timeline
 ---
 
 ### Task 1: HTML 骨架替换
@@ -118,6 +120,7 @@ git add public/index.html
 git commit -m "feat: 首屏双面板 HTML 骨架（现在 + 重要时间）"
 ```
 
+archived-with: 2026-07-14-home-hero-timeline
 ---
 
 ### Task 2: CSS 双面板与三行卡片样式（桌面基线）
@@ -407,6 +410,7 @@ git add public/css/fluffy.css
 git commit -m "style: 首屏双面板与三行时间轴桌面样式"
 ```
 
+archived-with: 2026-07-14-home-hero-timeline
 ---
 
 ### Task 3: CSS 响应式断点
@@ -538,6 +542,7 @@ git add public/css/fluffy.css
 git commit -m "style: 首屏双面板响应式断点（980/680/420）"
 ```
 
+archived-with: 2026-07-14-home-hero-timeline
 ---
 
 ### Task 4: CSS 清理无引用旧规则与动画
@@ -612,6 +617,7 @@ git add public/css/fluffy.css
 git commit -m "chore: 清理首屏旧圆盘/标题/spotlight 无引用 CSS 与动画"
 ```
 
+archived-with: 2026-07-14-home-hero-timeline
 ---
 
 ### Task 5: card-render.js 数据层（getHeroMoments + formatMomentCountdown + 日期/色条辅助）
@@ -778,6 +784,7 @@ git add public/js/card-render.js
 git commit -m "feat: hero 面板数据层（getHeroMoments/formatMomentCountdown/formatMomentDateParts）"
 ```
 
+archived-with: 2026-07-14-home-hero-timeline
 ---
 
 ### Task 6: card-render.js renderHeroTimeline + buildMomentRow
@@ -969,6 +976,7 @@ git add public/js/card-render.js
 git commit -m "feat: hero 右侧三行时间轴 DOM 渲染（renderHeroTimeline/buildMomentRow）"
 ```
 
+archived-with: 2026-07-14-home-hero-timeline
 ---
 
 ### Task 7: card-render.js refreshHeroMoments + renderFixed 重写 + refreshRunningTimes 适配 + 退役 renderSpotlight
@@ -1130,6 +1138,7 @@ git add public/js/card-render.js
 git commit -m "refactor: hero 面板每秒行内刷新，renderFixed 改写，退役 renderSpotlight"
 ```
 
+archived-with: 2026-07-14-home-hero-timeline
 ---
 
 ### Task 8: home.js updateCurrentTime 分层时钟 + 滚动揭示阈值复核 + 清理旧引用
@@ -1242,6 +1251,7 @@ git add public/js/home.js
 git commit -m "feat: 左侧现在面板分层时钟，滚动揭示阈值复核"
 ```
 
+archived-with: 2026-07-14-home-hero-timeline
 ---
 
 ### Task 9: 验证（语法 + 浏览器矩阵 + 数据态 + 只读）
@@ -1355,6 +1365,7 @@ git commit -m "fix: 首屏双面板验证修复"
 ```
 若全部通过无修改，跳过本步。
 
+archived-with: 2026-07-14-home-hero-timeline
 ---
 
 ## Self-Review 记录

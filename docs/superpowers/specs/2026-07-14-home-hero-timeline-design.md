@@ -2,6 +2,8 @@
 comet_change: home-hero-timeline
 role: technical-design
 canonical_spec: openspec
+archived-with: 2026-07-14-home-hero-timeline
+status: final
 ---
 
 # 首页首屏「现在 + 重要时间」双面板技术设计

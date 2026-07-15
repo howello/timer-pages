@@ -12,3 +12,5 @@ comet.yaml
 !.dev.vars.example
 .env*
 !.env.example
+
+.superpowers
